@@ -1,39 +1,78 @@
-import { APIGatewayProxyEventV2, SQSEvent } from "aws-lambda";
+export const Context = {
+  create,
+  reset,
+  memo,
+};
 
-const map = new Map();
+const state = {
+  requestID: "",
+  contexts: new Map<any, ContextInfo>(),
+  tracking: [] as any[],
+};
 
-type Context = () => any;
+interface ContextInfo {
+  value: any;
+  dependants: Set<any>;
+}
 
-export function createContext<C extends Context>(cb: C) {
+function create<C>(cb?: () => C) {
+  const id = Symbol();
   return {
     use() {
-      let result = map.get(cb);
+      let result = state.contexts.get(id);
+
       if (!result) {
-        result = cb();
-        map.set(cb, result);
+        if (!cb) throw new Error(`"${String(id)}" context must be provided.`);
+        state.tracking.push(id);
+        const value = cb();
+        state.tracking.pop();
+        result = {
+          value,
+          dependants: new Set(),
+        };
+        state.contexts.set(id, result);
       }
-      return result as ReturnType<C>;
+      const last = state.tracking[state.tracking.length - 1];
+      // Use is being called within another context booting up so mark it as a dependent
+      if (last) result!.dependants.add(last);
+      return result!.value as C;
     },
-    provide(value: ReturnType<C>) {
-      map.set(cb, value);
+    provide(value: C) {
+      const requestID = (global as any)[
+        Symbol.for("aws.lambda.runtime.requestId")
+      ];
+
+      // If a new request has started, automatically clear all contexts
+      if (state.requestID !== requestID) {
+        state.requestID = requestID;
+        reset();
+      }
+
+      // If the context is already set, we need to reset its dependants
+      resetDependencies(id);
+
+      state.contexts.set(id, {
+        value,
+        dependants: new Set(),
+      });
     },
   };
 }
 
-const EventContext = createContext((): APIGatewayProxyEventV2 | SQSEvent => {
-  throw new Error("Cannot determine event. Please provide it.");
-});
+function reset() {
+  state.contexts.clear();
+}
 
-const SessionContext = createContext(() => {
-  const event = EventContext.use();
-  if ("requestContext" in event) {
-    const { authorization } = event.headers;
-    if (!authorization)
-      throw new Error("Authorization header is missing. Please provide it.");
-
-    // jwt decode
-    return { type: "user", userID: "user-id" };
+function resetDependencies(id: any) {
+  const info = state.contexts.get(id);
+  if (!info) return;
+  for (const dependantID of info.dependants) {
+    resetDependencies(dependantID);
+    state.contexts.delete(dependantID);
   }
+}
 
-  throw new Error("Cannot determine session. Please provide it.");
-});
+function memo<C>(cb: () => C) {
+  const ctx = create(cb);
+  return ctx.use;
+}

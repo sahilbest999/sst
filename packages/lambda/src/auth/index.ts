@@ -1,24 +1,16 @@
-import { CognitoJwtVerifier } from "aws-jwt-verify";
+import { GoogleAdapter, TwitterAdapter } from "./adapters/google";
 
-let verifier: ReturnType<typeof createVerifier> | undefined = undefined;
-
-export function init(userPoolId: string) {
-  verifier = createVerifier(userPoolId);
-}
-
-function createVerifier(userPoolId: string) {
-  return CognitoJwtVerifier.create({
-    userPoolId,
-  });
-}
-
-function verify(token: string) {
-  if (!verifier)
-    throw new Error(`Auth must be initialized with "Auth.init(userPoolId)"`);
-  return verifier.verify(token, { clientId: null, tokenUse: "access" });
-}
-
-export const Auth = {
-  init,
-  verify,
+type Adapter = {
+  callback: any;
 };
+
+function provider<T extends Adapter>(config: { start: () => T }) {
+  return config;
+}
+
+provider({
+  start: () => {
+    if (process.env) return GoogleAdapter({} as any);
+    return TwitterAdapter({} as any);
+  },
+});
