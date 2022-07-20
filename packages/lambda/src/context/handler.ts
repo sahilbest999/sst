@@ -20,19 +20,25 @@ interface Handlers {
 
 type HandlerTypes = keyof Handlers;
 
-type Events = {
+type Requests = {
   [key in HandlerTypes]: {
     type: key;
     event: Handlers[key]["event"];
+    context: LambdaContext;
   };
 }[HandlerTypes];
 
-const EventContext = Context.create<Events>();
+const RequestContext = Context.create<Requests>();
 
 export function useEvent<Type extends HandlerTypes>(type: Type) {
-  const ctx = EventContext.use();
+  const ctx = RequestContext.use();
   if (ctx.type !== type) throw new Error(`Expected ${type} event`);
   return ctx.event as Handlers[Type]["event"];
+}
+
+export function useLambdaContext() {
+  const ctx = RequestContext.use();
+  return ctx.context;
 }
 
 export function Handler<
@@ -41,7 +47,7 @@ export function Handler<
   Response = Handlers[Type]["response"]
 >(type: Type, cb: (evt: Event, ctx: LambdaContext) => Promise<Response>) {
   return function handler(event: Event, context: LambdaContext) {
-    EventContext.provide({ type, event } as any);
+    RequestContext.provide({ type, event: event as any, context });
     return cb(event, context);
   };
 }
