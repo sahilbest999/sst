@@ -3,13 +3,13 @@ import {
   FormatPayloadParams,
   getGraphQLParameters,
   processRequest,
-  Request,
+  Request
 } from "graphql-helix";
 
 import {
   Context,
   APIGatewayProxyEventV2,
-  APIGatewayProxyHandlerV2,
+  APIGatewayProxyHandlerV2
 } from "aws-lambda";
 import { GraphQLSchema } from "graphql";
 
@@ -28,7 +28,7 @@ export function createGQLHandler<T>(config: HandlerConfig<T>) {
       body: event.body ? JSON.parse(event.body) : undefined,
       query: event.queryStringParameters,
       method: event.requestContext.http.method,
-      headers: event.headers,
+      headers: event.headers
     };
 
     const { operationName, query, variables } = getGraphQLParameters(request);
@@ -41,28 +41,26 @@ export function createGQLHandler<T>(config: HandlerConfig<T>) {
       request,
       schema: config.schema,
       formatPayload: config.formatPayload as any,
-      contextFactory: async (execution) => {
+      contextFactory: async execution => {
         if (config.context) {
           return config.context({
             event: event,
             context,
-            execution,
+            execution
           });
         }
         return undefined;
-      },
+      }
     });
     if (result.type === "RESPONSE") {
       return {
         statusCode: result.status,
         body: JSON.stringify(result.payload),
-        headers: Object.fromEntries(
-          result.headers.map((h) => [h.name, h.value])
-        ),
+        headers: Object.fromEntries(result.headers.map(h => [h.name, h.value]))
       };
     }
     return {
-      statusCode: 500,
+      statusCode: 500
     };
   };
 

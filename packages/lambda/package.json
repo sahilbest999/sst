@@ -2,6 +2,7 @@
   "name": "@serverless-stack/node",
   "version": "1.8.0",
   "type": "module",
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },
@@ -10,7 +11,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepare": "yarn run build"
+    "prepare": "yarn run build",
+    "test": "vitest run"
   },
   "license": "MIT",
   "dependencies": {
@@ -23,7 +25,8 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.90",
-    "@types/node": "^17.0.10"
+    "@types/node": "^17.0.10",
+    "vitest": "^0.18.1"
   },
   "gitHead": "8ac2d0abc11d5de721c87658bb445e3d6c211dcf",
   "optionalDependencies": {

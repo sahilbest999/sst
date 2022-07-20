@@ -4,8 +4,9 @@
     "declaration": true,
     "module": "esnext",
     "moduleResolution": "node",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["src"],
+  "include": ["src", "test"],
   "exclude": []
 }

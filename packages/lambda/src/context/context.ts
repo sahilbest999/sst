@@ -1,13 +1,13 @@
 export const Context = {
   create,
   reset,
-  memo,
+  memo
 };
 
 const state = {
   requestID: "",
   contexts: new Map<any, ContextInfo>(),
-  tracking: [] as any[],
+  tracking: [] as any[]
 };
 
 interface ContextInfo {
@@ -28,7 +28,7 @@ function create<C>(cb?: () => C) {
         state.tracking.pop();
         result = {
           value,
-          dependants: new Set(),
+          dependants: new Set()
         };
         state.contexts.set(id, result);
       }
@@ -53,9 +53,9 @@ function create<C>(cb?: () => C) {
 
       state.contexts.set(id, {
         value,
-        dependants: new Set(),
+        dependants: new Set()
       });
-    },
+    }
   };
 }
 
@@ -72,7 +72,7 @@ function resetDependencies(id: any) {
   }
 }
 
-function memo<C>(cb: () => C) {
+export function memo<C>(cb: () => C) {
   const ctx = create(cb);
   return ctx.use;
 }
