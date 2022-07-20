@@ -1,5 +1,5 @@
 import { Handler } from "../context/handler";
 
-export function AuthFunction() {
+export function AuthHandler() {
   return Handler("api", async () => {});
 }
