@@ -17,7 +17,7 @@ interface Config {
   ) => Promise<APIGatewayProxyStructuredResultV2>;
 }
 
-declare module "./provider" {
+declare module "./provider.js" {
   export interface Adapters {
     google: typeof GoogleAdapter;
   }

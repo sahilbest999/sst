@@ -2,9 +2,9 @@
   "extends": "@tsconfig/node14/tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "module": "nodenext",
+    "module": "esnext",
     "moduleResolution": "node",
-    "outDir": "./dist",
+    "outDir": ".",
     "allowSyntheticDefaultImports": true
   },
   "include": ["src"],
