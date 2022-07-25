@@ -9,7 +9,7 @@ import {
   ProcessRequestOptions,
   Request
 } from "graphql-helix";
-import { Handler } from "../context/handler";
+import { Handler, useEvent, useLambdaContext } from "../context/handler";
 import {
   useHttpHeaders,
   useHttpMethod,
@@ -32,7 +32,7 @@ interface GraphQLHandlerConfig<C> {
 }
 
 export function GraphQLHandler<C>(config: GraphQLHandlerConfig<C>) {
-  return Handler("api", async (evt, ctx) => {
+  return Handler("api", async () => {
     const request: Request = {
       body: useJsonBody(),
       query: useQueryParams(),
@@ -53,8 +53,8 @@ export function GraphQLHandler<C>(config: GraphQLHandlerConfig<C>) {
       contextFactory: async execution => {
         if (config.context) {
           return config.context({
-            event: evt,
-            context: ctx,
+            event: useEvent("api"),
+            context: useLambdaContext(),
             execution
           });
         }

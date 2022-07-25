@@ -1,4 +1,3 @@
-import { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
 import { Context } from "./context";
 import { useEvent } from "./handler";
 
@@ -34,6 +33,16 @@ export const useFormData = /* @__PURE__ */ Context.memo(() => {
   const params = new URLSearchParams(body);
   return params;
 });
+
+export const usePath = /* @__PURE__ */ Context.memo(() => {
+  const evt = useEvent("api");
+  return evt.rawPath.split("/");
+});
+
+export function useDomainName() {
+  const evt = useEvent("api");
+  return evt.requestContext.domainName;
+}
 
 export function useHttpMethod() {
   const evt = useEvent("api");

@@ -1,4 +1,4 @@
-import { Context } from "../../src/context";
+import { Context } from "../../src/context/context.js";
 
 import { it, describe, expect } from "vitest";
 
