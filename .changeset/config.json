@@ -12,7 +12,7 @@
       "@serverless-stack/core",
       "@serverless-stack/console",
       "create-sst",
-      "@serverless-stack/node",
+      "@serverless-stack/lambda",
       "@serverless-stack/web",
       "@serverless-stack/static-site-env"
     ]
