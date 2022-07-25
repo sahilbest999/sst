@@ -7,6 +7,6 @@
     "outDir": "./dist",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src", "test"],
+  "include": ["src"],
   "exclude": []
 }
