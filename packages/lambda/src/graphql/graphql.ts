@@ -11,8 +11,8 @@ import {
 } from "graphql-helix";
 import { Handler, useEvent, useLambdaContext } from "../context/handler";
 import {
-  useHttpHeaders,
-  useHttpMethod,
+  useHeaders,
+  useMethod,
   useJsonBody,
   useQueryParams
 } from "../context/http";
@@ -36,8 +36,8 @@ export function GraphQLHandler<C>(config: GraphQLHandlerConfig<C>) {
     const request: Request = {
       body: useJsonBody(),
       query: useQueryParams(),
-      method: useHttpMethod(),
-      headers: useHttpHeaders()
+      method: useMethod(),
+      headers: useHeaders()
     };
 
     const { operationName, query, variables } = getGraphQLParameters(request);

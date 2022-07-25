@@ -14,5 +14,4 @@ export interface Adapter {
 
 export type Provider<A extends AdaptersUnion> = {
   adapter: A;
-  config: Parameters<A["handle"]>[0];
-};
+} & Parameters<A["handle"]>[0];

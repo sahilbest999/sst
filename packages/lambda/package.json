@@ -6,9 +6,10 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/index.js",
   "exports": {
-    "import": "./dist/index.js"
+    "./context": "./dist/context/index.js"
+    "./auth": "./dist/auth/index.js"
+    "./graphql": "./dist/graphql/index.js"
   },
   "scripts": {
     "build": "tsc",

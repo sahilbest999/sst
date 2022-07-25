@@ -1,5 +1,5 @@
-import { Context } from "./context";
-import { useEvent } from "./handler";
+import { Context } from "./context.js";
+import { useEvent } from "./handler.js";
 
 export const useCookies = /* @__PURE__ */ Context.memo(() => {
   const evt = useEvent("api");
@@ -44,14 +44,19 @@ export function useDomainName() {
   return evt.requestContext.domainName;
 }
 
-export function useHttpMethod() {
+export function useMethod() {
   const evt = useEvent("api");
   return evt.requestContext.http.method;
 }
 
-export function useHttpHeaders() {
+export function useHeaders() {
   const evt = useEvent("api");
   return evt.headers || {};
+}
+
+export function useHeader(key: string) {
+  const headers = useHeaders();
+  return headers[key];
 }
 
 export function useFormValue(name: string) {

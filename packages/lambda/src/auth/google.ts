@@ -1,6 +1,11 @@
 import { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
 import { generators, IdTokenClaims, Issuer } from "openid-client";
-import { useCookie, useFormData, usePath } from "../context/http";
+import {
+  useCookie,
+  useDomainName,
+  useFormData,
+  usePath
+} from "../context/http.js";
 import { createAdapter } from "./provider.js";
 
 const issuer = await Issuer.discover("https://accounts.google.com");
@@ -21,7 +26,10 @@ declare module "./provider" {
 export const GoogleAdapter = createAdapter({
   handle: async (config: Config) => {
     const [step] = usePath().slice(-1);
-    const callback = [...usePath().slice(0, -1), "callback"].join("/");
+    const callback =
+      "https://" +
+      useDomainName() +
+      [...usePath().slice(0, -1), "callback"].join("/");
 
     if (step === "authorize") {
       const client = new issuer.Client({
@@ -37,8 +45,10 @@ export const GoogleAdapter = createAdapter({
       });
       // writeCookie("auth-nonce", nonce);
 
+      const expires = new Date(Date.now() + 1000 * 30).toUTCString();
       return {
         statusCode: 302,
+        cookies: [`auth-nonce=${nonce}; HttpOnly; expires=${expires}`],
         headers: {
           location: url
         }
