@@ -3,14 +3,14 @@ import { useHeader } from "../context/http.js";
 import { createSigner, createVerifier, SignerOptions } from "fast-jwt";
 import { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
 
-export interface Session {}
+export interface SessionTypes {}
 
 export type SessionValue = {
-  [type in keyof Session]: {
+  [type in keyof SessionTypes]: {
     type: type;
-    properties: Session[type];
+    properties: SessionTypes[type];
   };
-}[keyof Session];
+}[keyof SessionTypes];
 
 const KEY = "12345678";
 const verifier = createVerifier({ key: KEY });
@@ -28,9 +28,9 @@ export function useSession<T = SessionValue>() {
   return ctx as T;
 }
 
-function create<T extends keyof Session>(input: {
+function create<T extends keyof SessionTypes>(input: {
   type: T;
-  properties: Session[T];
+  properties: SessionTypes[T];
   options?: Partial<SignerOptions>;
 }) {
   const signer = createSigner(Object.assign(input.options || {}, { key: KEY }));
@@ -41,18 +41,23 @@ function create<T extends keyof Session>(input: {
   return token as string;
 }
 
-export function cookie<T extends keyof Session>(input: {
+export function cookie<T extends keyof SessionTypes>(input: {
   type: T;
-  properties: Session[T];
+  properties: SessionTypes[T];
   redirect: string;
   options?: Partial<SignerOptions>;
 }): APIGatewayProxyStructuredResultV2 {
   const token = create(input);
   return {
-    cookies: []
+    statusCode: 307,
+    headers: {
+      location: input.redirect
+    },
+    cookies: [`auth-token=${token}; HttpOnly; Path=/; Expires=${new Date()}`]
   };
 }
 
 export const Session = {
-  create
+  create,
+  cookie
 };
