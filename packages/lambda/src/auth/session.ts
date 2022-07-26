@@ -1,9 +1,11 @@
 import { Context } from "../context/context.js";
-import { useHeader } from "../context/http.js";
+import { useCookie, useHeader } from "../context/http.js";
 import { createSigner, createVerifier, SignerOptions } from "fast-jwt";
 import { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
 
-export interface SessionTypes {}
+export interface SessionTypes {
+  public: {};
+}
 
 export type SessionValue = {
   [type in keyof SessionTypes]: {
@@ -16,10 +18,23 @@ const KEY = "12345678";
 const verifier = createVerifier({ key: KEY });
 
 const SessionMemo = /* @__PURE__ */ Context.memo(() => {
+  let token = "";
+
   const header = useHeader("authorization")!;
-  const token = header.substring(7);
-  const jwt = verifier(token);
-  return jwt;
+  if (header) token = header.substring(7);
+
+  const cookie = useCookie("auth-token");
+  if (cookie) token = cookie;
+
+  if (token) {
+    const jwt = verifier(token);
+    return jwt;
+  }
+
+  return {
+    type: "public",
+    properties: {}
+  };
 });
 
 // This is a crazy TS hack to prevent the types from being evaluated too soon
