@@ -68,7 +68,11 @@ export function cookie<T extends keyof SessionTypes>(input: {
     headers: {
       location: input.redirect
     },
-    cookies: [`auth-token=${token}; HttpOnly; Path=/; Expires=${new Date()}`]
+    cookies: [
+      `auth-token=${token}; HttpOnly; Path=/; Expires=${new Date(
+        Date.now() + (input.options?.expiresIn || 1000 * 60 * 60 * 24 * 7)
+      )}`
+    ]
   };
 }
 
