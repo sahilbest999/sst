@@ -9,6 +9,6 @@ export function AuthHandler<
     const [providerName] = usePath().slice(-2);
     const provider = config.providers[providerName];
     if (!provider) throw new Error("No matching provider found");
-    return provider.adapter.handle(provider);
+    return provider.adapter.handle(provider as any);
   });
 }
