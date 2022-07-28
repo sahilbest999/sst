@@ -7,7 +7,7 @@ import {
 } from "aws-lambda";
 import { Context } from "./context.js";
 
-interface Handlers {
+export interface Handlers {
   api: {
     event: APIGatewayProxyEventV2;
     response: APIGatewayProxyStructuredResultV2;

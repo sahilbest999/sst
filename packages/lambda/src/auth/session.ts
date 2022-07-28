@@ -2,6 +2,7 @@ import { Context } from "../context/context.js";
 import { useCookie, useHeader } from "../context/http.js";
 import { createSigner, createVerifier, SignerOptions } from "fast-jwt";
 import { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
+import { KEY, verifier } from "./jwt.js";
 
 export interface SessionTypes {
   public: {};
@@ -13,9 +14,6 @@ export type SessionValue = {
     properties: SessionTypes[type];
   };
 }[keyof SessionTypes];
-
-const KEY = "12345678";
-const verifier = createVerifier({ key: KEY });
 
 const SessionMemo = /* @__PURE__ */ Context.memo(() => {
   let token = "";
@@ -64,7 +62,7 @@ export function cookie<T extends keyof SessionTypes>(input: {
 }): APIGatewayProxyStructuredResultV2 {
   const token = create(input);
   return {
-    statusCode: 307,
+    statusCode: 302,
     headers: {
       location: input.redirect
     },
@@ -76,7 +74,23 @@ export function cookie<T extends keyof SessionTypes>(input: {
   };
 }
 
+export function parameter<T extends keyof SessionTypes>(input: {
+  type: T;
+  redirect: string;
+  properties: SessionTypes[T];
+  options?: Partial<SignerOptions>;
+}): APIGatewayProxyStructuredResultV2 {
+  const token = create(input);
+  return {
+    statusCode: 302,
+    headers: {
+      location: input.redirect + "?token=" + token
+    }
+  };
+}
+
 export const Session = {
   create,
-  cookie
+  cookie,
+  parameter
 };
