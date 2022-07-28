@@ -51,6 +51,43 @@ To begin authentication you can simple redirect your frontend to a url in the fo
 https://<domain>/auth/<provider-name>/authorize
 ```
 
+#### Adapters
+
+##### Google Adapter
+
+The google adapter supports both OIDC and Oauth mode. Use OIDC when you only need to authenticate who the user is and retreive their email + name. Use Oauth when you need the user to grant you access to additional scopes like reading their calendar.
+
+##### oidc
+```
+GoogleAdapter({
+  mode: "oidc",
+  clientID: "<client-id>",
+  onSuccess: async (tokenset) => {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(tokenset.claims())
+    }
+  },
+}),
+```
+Tokenset claims will include basic user info
+
+##### oauth
+```
+GoogleAdapter({
+  mode: "oauth",
+  clientID: "<client-id>",
+  clientSecret: "<client-secret>",
+  onSuccess: async (tokenset) => {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(tokenset.claims())
+    }
+  },
+}),
+```
+Tokenset claims will include basic user info
+
 #### Sessions
 
 This library also provides a way to create and manage typesafe sessions. You can define what your various sessions and what data they contain like this:
