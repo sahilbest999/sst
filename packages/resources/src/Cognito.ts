@@ -103,7 +103,7 @@ export interface CognitoProps {
      * @example
      *
      * ```js
-     * new Auth(stack, "Auth", {
+     * new Cognito(stack, "Auth", {
      *   defaults: {
      *     function: {
      *       timeout: 20,
@@ -133,7 +133,7 @@ export interface CognitoProps {
    * @example
    *
    * ```js
-   * new Auth(stack, "Auth", {
+   * new Cognito(stack, "Auth", {
    *   triggers: {
    *     preAuthentication: "src/preAuthentication.main",
    *     postAuthentication: "src/postAuthentication.main",

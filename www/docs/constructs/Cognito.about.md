@@ -8,9 +8,9 @@ The `Auth` construct is a higher level CDK construct that makes it easy to confi
 ### Using the minimal config
 
 ```js
-import { Auth } from "@serverless-stack/resources";
+import { Cognito } from "@serverless-stack/resources";
 
-new Auth(stack, "Auth");
+new Cognito(stack, "Auth");
 ```
 
 ### Configuring login
@@ -34,7 +34,7 @@ There are two ways of setting this up.
    To use this option, set the `login` prop to:
 
    ```js
-   new Auth(stack, "Auth", {
+   new Cognito(stack, "Auth", {
      login: ["email", "phone", "username", "preferredUsername"]
    });
    ```
@@ -52,7 +52,7 @@ There are two ways of setting this up.
    To use this option, set the `login` prop to:
 
    ```js
-   new Auth(stack, "Auth", {
+   new Cognito(stack, "Auth", {
      login: ["email", "phone"]
    });
    ```
@@ -66,7 +66,7 @@ The Cognito User Pool can invoke a Lambda function for specific [triggers](#trig
 #### Adding triggers
 
 ```js
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
   triggers: {
     preAuthentication: "src/preAuthentication.main",
     postAuthentication: "src/postAuthentication.main",
@@ -77,7 +77,7 @@ new Auth(stack, "Auth", {
 #### Specifying function props for all the triggers
 
 ```js
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
   defaults: {
     function: {
       timeout: 20,
@@ -97,7 +97,7 @@ new Auth(stack, "Auth", {
 Configure each Lambda function separately.
 
 ```js
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
   triggers: {
     preAuthentication: {
       handler: "src/preAuthentication.main",
@@ -113,7 +113,7 @@ new Auth(stack, "Auth", {
 Note that, you can set the `defaults.function` while using the `FunctionProps` per trigger. The `function` will just override the `defaults.function`. Except for the `environment`, the `layers`, and the `permissions` properties, it will be merged.
 
 ```js
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
     defaults: {
     function: {
       timeout: 20,
@@ -140,7 +140,7 @@ So in the above example, the `preAuthentication` function doesn't use the `timeo
 Allow all the triggers to access S3.
 
 ```js {8}
-const auth = new Auth(stack, "Auth", {
+const auth = new Cognito(stack, "Auth", {
   triggers: {
     preAuthentication: "src/preAuthentication.main",
     postAuthentication: "src/postAuthentication.main",
@@ -155,7 +155,7 @@ auth.attachPermissionsForTriggers(["s3"]);
 Allow one of the triggers to access S3.
 
 ```js {8}
-const auth = new Auth(stack, "Auth", {
+const auth = new Cognito(stack, "Auth", {
   triggers: {
     preAuthentication: "src/preAuthentication.main",
     postAuthentication: "src/postAuthentication.main",
@@ -172,7 +172,7 @@ Here we are referring to the trigger using the trigger key, `preAuthentication`.
 #### Enabling federation with Auth0
 
 ```js
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
   identityPoolFederation: {
     auth0: {
       domain: "https://myorg.us.auth0.com",
@@ -185,7 +185,7 @@ new Auth(stack, "Auth", {
 #### Enabling federation with Twitter
 
 ```js
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
   identityPoolFederation: {
     twitter: {
       consumerKey: "gyMbPOiwefr6x63SjIW8NN2d9",
@@ -198,7 +198,7 @@ new Auth(stack, "Auth", {
 #### Enabling federation with multiple social logins
 
 ```js
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
   identityPoolFederation: {
     facebook: { appId: "419718329085014" },
     apple: { servicesId: "com.myapp.client" },
@@ -214,7 +214,7 @@ new Auth(stack, "Auth", {
 #### Attaching permissions for authenticated federation identity
 
 ```js {3}
-const auth = new Auth(stack, "Auth");
+const auth = new Cognito(stack, "Auth");
 
 auth.attachPermissionsForAuthUsers(stack, [api, "s3"]);
 ```
@@ -222,7 +222,7 @@ auth.attachPermissionsForAuthUsers(stack, [api, "s3"]);
 #### Attaching permissions for unauthenticated federation identity
 
 ```js {3}
-const auth = new Auth(stack, "Auth");
+const auth = new Cognito(stack, "Auth");
 
 auth.attachPermissionsForUnauthUsers(stack, [api, "s3"]);
 ```
@@ -239,7 +239,7 @@ import {
   DateTimeAttribute,
 } from "aws-cdk-lib/aws-cognito";
 
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
   cdk: {
     userPool: {
       standardAttributes: {
@@ -264,7 +264,7 @@ Override the internally created CDK `UserPool` and `UserPoolClient` instance.
 ```js {5-6}
 import { UserPool, UserPoolClient } from "aws-cdk-lib/aws-cognito";
 
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
   cdk: {
     userPool: UserPool.fromUserPoolId(stack, "IUserPool", "pool-id"),
     userPoolClient: UserPoolClient.fromUserPoolClientId(stack, "IUserPoolClient", "pool-client-id"),
@@ -277,10 +277,10 @@ new Auth(stack, "Auth", {
 You can create the Auth construct in one stack, and attach permissions in other stacks. To do this, return the Auth construct from your stack function.
 
 ```ts title="stacks/AuthStack.ts"
-import { Auth, StackContext } from "@serverless-stack/resources";
+import { Cognito, StackContext } from "@serverless-stack/resources";
 
 export function AuthStack({ stack }: StackContext) {
-  const auth = new Auth(stack, "Auth");
+  const auth = new Cognito(stack, "Auth");
   return {
     auth
   }

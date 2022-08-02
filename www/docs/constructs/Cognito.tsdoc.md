@@ -8,13 +8,13 @@
 
 ## Constructor
 ```ts
-new Auth(scope, id, props)
+new Cognito(scope, id, props)
 ```
 _Parameters_
 - __scope__ <span class="mono">[Construct](https://docs.aws.amazon.com/cdk/api/v2/docs/constructs.Construct.html)</span>
 - __id__ <span class="mono">string</span>
-- __props__ <span class="mono">[AuthProps](#authprops)</span>
-## AuthProps
+- __props__ <span class="mono">[CognitoProps](#cognitoprops)</span>
+## CognitoProps
 
 
 
@@ -27,7 +27,7 @@ The default function props to be applied to all the triggers in the UserPool. Th
 
 
 ```js
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
   defaults: {
     function: {
       timeout: 20,
@@ -41,7 +41,7 @@ new Auth(stack, "Auth", {
 
 ### identityPoolFederation?
 
-_Type_ : <span class='mono'><span class="mono">boolean</span> | <span class="mono">[AuthCognitoIdentityPoolFederationProps](#authcognitoidentitypoolfederationprops)</span></span>
+_Type_ : <span class='mono'><span class="mono">boolean</span> | <span class="mono">[CognitoIdentityPoolFederationProps](#cognitoidentitypoolfederationprops)</span></span>
 
 _Default_ : <span class="mono">Identity Pool created with the User Pool as the authentication provider</span>
 
@@ -60,7 +60,7 @@ You cannot change the login property once the User Pool has been created.
 
 ### triggers?
 
-_Type_ : <span class="mono">[AuthUserPoolTriggers](#authuserpooltriggers)</span>
+_Type_ : <span class="mono">[CognitoUserPoolTriggers](#cognitouserpooltriggers)</span>
 
 _Default_ : <span class="mono">No triggers</span>
 
@@ -69,7 +69,7 @@ Configure triggers for this User Pool
 
 
 ```js
-new Auth(stack, "Auth", {
+new Cognito(stack, "Auth", {
   triggers: {
     preAuthentication: "src/preAuthentication.main",
     postAuthentication: "src/postAuthentication.main",
@@ -92,7 +92,7 @@ This allows you to override the default settings this construct uses internally 
 
 
 ## Properties
-An instance of `Auth` has the following properties.
+An instance of `Cognito` has the following properties.
 ### cognitoIdentityPoolId
 
 _Type_ : <span class='mono'><span class="mono">undefined</span> | <span class="mono">string</span></span>
@@ -140,7 +140,7 @@ _Type_ : <span class="mono">[IUserPoolClient](https://docs.aws.amazon.com/cdk/ap
 
 
 ## Methods
-An instance of `Auth` has the following methods.
+An instance of `Cognito` has the following methods.
 ### attachPermissionsForAuthUsers
 
 ```ts
@@ -234,14 +234,14 @@ getFunction(triggerKey)
 ```
 _Parameters_
 - __triggerKey__ 
-## AuthAppleProps
+## CognitoAppleProps
 
 
 ### servicesId
 
 _Type_ : <span class="mono">string</span>
 
-## AuthAuth0Props
+## CognitoAuth0Props
 
 
 ### clientId
@@ -252,21 +252,21 @@ _Type_ : <span class="mono">string</span>
 
 _Type_ : <span class="mono">string</span>
 
-## AuthAmazonProps
+## CognitoAmazonProps
 
 
 ### appId
 
 _Type_ : <span class="mono">string</span>
 
-## AuthGoogleProps
+## CognitoGoogleProps
 
 
 ### clientId
 
 _Type_ : <span class="mono">string</span>
 
-## AuthTwitterProps
+## CognitoTwitterProps
 
 
 ### consumerKey
@@ -277,14 +277,14 @@ _Type_ : <span class="mono">string</span>
 
 _Type_ : <span class="mono">string</span>
 
-## AuthFacebookProps
+## CognitoFacebookProps
 
 
 ### appId
 
 _Type_ : <span class="mono">string</span>
 
-## AuthUserPoolTriggers
+## CognitoUserPoolTriggers
 
 
 ### createAuthChallenge?
@@ -335,42 +335,42 @@ _Type_ : <span class='mono'><span class="mono">string</span> | <span class="mono
 
 _Type_ : <span class='mono'><span class="mono">string</span> | <span class="mono">[Function](Function#function)</span> | <span class="mono">[FunctionProps](Function#functionprops)</span></span>
 
-## AuthCdkCfnIdentityPoolProps
+## CognitoCdkCfnIdentityPoolProps
 
 
 ### allowUnauthenticatedIdentities?
 
 _Type_ : <span class="mono">boolean</span>
 
-## AuthCognitoIdentityPoolFederationProps
+## CognitoIdentityPoolFederationProps
 
 
 ### amazon?
 
-_Type_ : <span class="mono">[AuthAmazonProps](#authamazonprops)</span>
+_Type_ : <span class="mono">[CognitoAmazonProps](#cognitoamazonprops)</span>
 
 ### apple?
 
-_Type_ : <span class="mono">[AuthAppleProps](#authappleprops)</span>
+_Type_ : <span class="mono">[CognitoAppleProps](#cognitoappleprops)</span>
 
 ### auth0?
 
-_Type_ : <span class="mono">[AuthAuth0Props](#authauth0props)</span>
+_Type_ : <span class="mono">[CognitoAuth0Props](#cognitoauth0props)</span>
 
 ### facebook?
 
-_Type_ : <span class="mono">[AuthFacebookProps](#authfacebookprops)</span>
+_Type_ : <span class="mono">[CognitoFacebookProps](#cognitofacebookprops)</span>
 
 ### google?
 
-_Type_ : <span class="mono">[AuthGoogleProps](#authgoogleprops)</span>
+_Type_ : <span class="mono">[CognitoGoogleProps](#cognitogoogleprops)</span>
 
 ### twitter?
 
-_Type_ : <span class="mono">[AuthTwitterProps](#authtwitterprops)</span>
+_Type_ : <span class="mono">[CognitoTwitterProps](#cognitotwitterprops)</span>
 
 
 ### cdk.cfnIdentityPool?
 
-_Type_ : <span class="mono">[AuthCdkCfnIdentityPoolProps](#authcdkcfnidentitypoolprops)</span>
+_Type_ : <span class="mono">[CognitoCdkCfnIdentityPoolProps](#cognitocdkcfnidentitypoolprops)</span>
 
