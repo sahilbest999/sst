@@ -33,6 +33,7 @@ Here's a rough list of the types of contructs that SST supports.
 - [`Bucket`](./Bucket.md)
 
 ## Auth
+- [`Auth`](./Auth.md)
 - [`Cognito`](./Cognito.md)
 
 ## Async
