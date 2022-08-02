@@ -1,4 +1,5 @@
 export * from "./App.js";
+export * from "./Auth.js";
 export * from "./Api.js";
 export * from "./RDS.js";
 export * from "./Cognito.js";

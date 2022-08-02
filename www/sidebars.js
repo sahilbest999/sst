@@ -243,7 +243,7 @@ module.exports = {
         "constructs/KinesisStream"
       ],
       Storage: ["constructs/Bucket"],
-      Auth: ["constructs/Cognito"],
+      Auth: ["constructs/Auth", "constructs/Cognito"],
       Types: [
         "constructs/Size",
         "constructs/Duration",
