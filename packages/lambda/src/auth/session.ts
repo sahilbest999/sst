@@ -61,15 +61,16 @@ export function cookie<T extends keyof SessionTypes>(input: {
   options?: Partial<SignerOptions>;
 }): APIGatewayProxyStructuredResultV2 {
   const token = create(input);
+  const expires = new Date(
+    Date.now() + (input.options?.expiresIn || 1000 * 60 * 60 * 24 * 7)
+  );
   return {
     statusCode: 302,
     headers: {
       location: input.redirect
     },
     cookies: [
-      `auth-token=${token}; HttpOnly; Path=/; Expires=${new Date(
-        Date.now() + (input.options?.expiresIn || 1000 * 60 * 60 * 24 * 7)
-      )}`
+      `auth-token=${token}; HttpOnly; SameSite=None; Secure; Path=/; Expires=${expires}`
     ]
   };
 }
