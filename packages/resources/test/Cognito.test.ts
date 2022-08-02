@@ -5,20 +5,20 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 import {
   App,
   Stack,
-  Auth,
-  AuthAuth0Props,
-  AuthAmazonProps,
-  AuthAppleProps,
-  AuthFacebookProps,
-  AuthGoogleProps,
-  AuthTwitterProps,
-  Function,
+  Cognito,
+  CognitoAuth0Props,
+  CognitoAmazonProps,
+  CognitoAppleProps,
+  CognitoFacebookProps,
+  CognitoGoogleProps,
+  CognitoTwitterProps,
+  Function
 } from "../src";
 
 const lambdaDefaultPolicy = {
   Action: ["xray:PutTraceSegments", "xray:PutTelemetryRecords"],
   Effect: "Allow",
-  Resource: "*",
+  Resource: "*"
 };
 
 ///////////////////
@@ -27,7 +27,7 @@ const lambdaDefaultPolicy = {
 
 test("cdk.userPool is undefined", async () => {
   const stack = new Stack(new App(), "stack");
-  const auth = new Auth(stack, "Auth", {});
+  const auth = new Cognito(stack, "Auth", {});
 
   expect(auth.cognitoIdentityPoolId).toBeDefined();
 
@@ -36,11 +36,11 @@ test("cdk.userPool is undefined", async () => {
     AdminCreateUserConfig: { AllowAdminCreateUserOnly: false },
     AutoVerifiedAttributes: ABSENT,
     UsernameAttributes: ABSENT,
-    UsernameConfiguration: { CaseSensitive: false },
+    UsernameConfiguration: { CaseSensitive: false }
   });
   hasResource(stack, "AWS::Cognito::UserPoolClient", {
     UserPoolId: { Ref: "AuthUserPool8115E87F" },
-    AllowedOAuthFlows: ["implicit", "code"],
+    AllowedOAuthFlows: ["implicit", "code"]
   });
   hasResource(stack, "AWS::Cognito::IdentityPool", {
     IdentityPoolName: "dev-my-app-Auth",
@@ -55,13 +55,13 @@ test("cdk.userPool is undefined", async () => {
               "cognito-idp.us-east-1.",
               { Ref: "AWS::URLSuffix" },
               "/",
-              { Ref: "AuthUserPool8115E87F" },
-            ],
-          ],
-        },
-      },
+              { Ref: "AuthUserPool8115E87F" }
+            ]
+          ]
+        }
+      }
     ],
-    SupportedLoginProviders: {},
+    SupportedLoginProviders: {}
   });
   countResources(stack, "AWS::IAM::Role", 2);
   hasResource(stack, "AWS::IAM::Role", {
@@ -72,21 +72,21 @@ test("cdk.userPool is undefined", async () => {
           Condition: {
             StringEquals: {
               "cognito-identity.amazonaws.com:aud": {
-                Ref: "AuthIdentityPool12DFB5E1",
-              },
+                Ref: "AuthIdentityPool12DFB5E1"
+              }
             },
             "ForAnyValue:StringLike": {
-              "cognito-identity.amazonaws.com:amr": "authenticated",
-            },
+              "cognito-identity.amazonaws.com:amr": "authenticated"
+            }
           },
           Effect: "Allow",
           Principal: {
-            Federated: "cognito-identity.amazonaws.com",
-          },
-        },
+            Federated: "cognito-identity.amazonaws.com"
+          }
+        }
       ],
-      Version: "2012-10-17",
-    },
+      Version: "2012-10-17"
+    }
   });
   hasResource(stack, "AWS::IAM::Role", {
     AssumeRolePolicyDocument: {
@@ -96,62 +96,62 @@ test("cdk.userPool is undefined", async () => {
           Condition: {
             StringEquals: {
               "cognito-identity.amazonaws.com:aud": {
-                Ref: "AuthIdentityPool12DFB5E1",
-              },
+                Ref: "AuthIdentityPool12DFB5E1"
+              }
             },
             "ForAnyValue:StringLike": {
-              "cognito-identity.amazonaws.com:amr": "unauthenticated",
-            },
+              "cognito-identity.amazonaws.com:amr": "unauthenticated"
+            }
           },
           Effect: "Allow",
           Principal: {
-            Federated: "cognito-identity.amazonaws.com",
-          },
-        },
+            Federated: "cognito-identity.amazonaws.com"
+          }
+        }
       ],
-      Version: "2012-10-17",
-    },
+      Version: "2012-10-17"
+    }
   });
 });
 
 test("cdk.userPool is prop", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     cdk: {
       userPool: {
-        mfa: cognito.Mfa.OPTIONAL,
+        mfa: cognito.Mfa.OPTIONAL
       },
       userPoolClient: {
-        disableOAuth: true,
-      },
-    },
+        disableOAuth: true
+      }
+    }
   });
   hasResource(stack, "AWS::Cognito::UserPool", {
     UserPoolName: "dev-my-app-Auth",
     AdminCreateUserConfig: { AllowAdminCreateUserOnly: false },
     MfaConfiguration: "OPTIONAL",
     UsernameAttributes: ABSENT,
-    UsernameConfiguration: { CaseSensitive: false },
+    UsernameConfiguration: { CaseSensitive: false }
   });
   hasResource(stack, "AWS::Cognito::UserPoolClient", {
     UserPoolId: { Ref: "AuthUserPool8115E87F" },
-    AllowedOAuthFlows: ABSENT,
+    AllowedOAuthFlows: ABSENT
   });
 });
 
 test("cdk.userPool is construct", async () => {
   const stack = new Stack(new App(), "stack");
   const userPool = new cognito.UserPool(stack, "UserPool", {
-    userPoolName: "user-pool",
+    userPoolName: "user-pool"
   });
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     cdk: {
-      userPool,
-    },
+      userPool
+    }
   });
   countResources(stack, "AWS::Cognito::UserPool", 1);
   hasResource(stack, "AWS::Cognito::UserPool", {
-    UserPoolName: "user-pool",
+    UserPoolName: "user-pool"
   });
   countResources(stack, "AWS::Cognito::UserPoolClient", 1);
 });
@@ -159,43 +159,43 @@ test("cdk.userPool is construct", async () => {
 test("cdk.userPoolClient is construct", async () => {
   const stack = new Stack(new App(), "stack");
   const userPool = new cognito.UserPool(stack, "UserPool", {
-    userPoolName: "user-pool",
+    userPoolName: "user-pool"
   });
   const userPoolClient = new cognito.UserPoolClient(stack, "UserPoolClient", {
     userPool,
-    disableOAuth: true,
+    disableOAuth: true
   });
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     cdk: {
       userPool,
-      userPoolClient,
-    },
+      userPoolClient
+    }
   });
   countResources(stack, "AWS::Cognito::UserPool", 1);
   hasResource(stack, "AWS::Cognito::UserPool", {
-    UserPoolName: "user-pool",
+    UserPoolName: "user-pool"
   });
   countResources(stack, "AWS::Cognito::UserPoolClient", 1);
   hasResource(stack, "AWS::Cognito::UserPoolClient", {
-    AllowedOAuthFlows: ABSENT,
+    AllowedOAuthFlows: ABSENT
   });
 });
 
 test("cdk.userPool is prop and cdk.userPoolClient is construct", async () => {
   const stack = new Stack(new App(), "stack");
   const userPool = new cognito.UserPool(stack, "UserPool", {
-    userPoolName: "user-pool",
+    userPoolName: "user-pool"
   });
   const userPoolClient = new cognito.UserPoolClient(stack, "UserPoolClient", {
     userPool,
-    disableOAuth: true,
+    disableOAuth: true
   });
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       cdk: {
         userPool: { mfa: cognito.Mfa.OPTIONAL },
-        userPoolClient,
-      },
+        userPoolClient
+      }
     });
   }).toThrow(
     /Cannot import the "userPoolClient" when the "userPool" is not imported./
@@ -204,10 +204,10 @@ test("cdk.userPool is prop and cdk.userPoolClient is construct", async () => {
 
 test("cdk.userPool is imported by userPoolName", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     cdk: {
-      userPool: cognito.UserPool.fromUserPoolId(stack, "IPool", "my-user-pool"),
-    },
+      userPool: cognito.UserPool.fromUserPoolId(stack, "IPool", "my-user-pool")
+    }
   });
   countResources(stack, "AWS::Cognito::UserPool", 0);
   countResources(stack, "AWS::Cognito::UserPoolClient", 1);
@@ -223,110 +223,110 @@ test("cdk.userPool is imported by userPoolName", async () => {
             [
               "cognito-idp.us-east-1.",
               { Ref: "AWS::URLSuffix" },
-              "/my-user-pool",
-            ],
-          ],
-        },
-      },
+              "/my-user-pool"
+            ]
+          ]
+        }
+      }
     ],
-    SupportedLoginProviders: {},
+    SupportedLoginProviders: {}
   });
 });
 
 test("cdk.userPool is imported by userPoolName with triggers", async () => {
   const stack = new Stack(new App(), "stack");
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       cdk: {
         userPool: cognito.UserPool.fromUserPoolId(
           stack,
           "IPool",
           "my-user-pool"
-        ),
+        )
       },
       triggers: {
-        createAuthChallenge: "test/lambda.handler",
-      },
+        createAuthChallenge: "test/lambda.handler"
+      }
     });
   }).toThrow(/Cannot add triggers when the "userPool" is imported./);
 });
 
 test("login is undefined", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth");
+  new Cognito(stack, "Auth");
   hasResource(stack, "AWS::Cognito::UserPool", {
     AutoVerifiedAttributes: ABSENT,
     UsernameAttributes: ABSENT,
-    UsernameConfiguration: { CaseSensitive: false },
+    UsernameConfiguration: { CaseSensitive: false }
   });
 });
 
 test("login is email", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
-    login: ["email"],
+  new Cognito(stack, "Auth", {
+    login: ["email"]
   });
   hasResource(stack, "AWS::Cognito::UserPool", {
     AutoVerifiedAttributes: ["email"],
     UsernameAttributes: ["email"],
-    UsernameConfiguration: { CaseSensitive: false },
+    UsernameConfiguration: { CaseSensitive: false }
   });
 });
 
 test("triggers is undefined", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {});
+  new Cognito(stack, "Auth", {});
   countResources(stack, "AWS::Lambda::Function", 0);
   hasResource(stack, "AWS::Cognito::UserPool", {
-    LambdaConfig: ABSENT,
+    LambdaConfig: ABSENT
   });
 });
 
 test("triggers is empty", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
-    triggers: {},
+  new Cognito(stack, "Auth", {
+    triggers: {}
   });
   countResources(stack, "AWS::Lambda::Function", 0);
   hasResource(stack, "AWS::Cognito::UserPool", {
-    LambdaConfig: ABSENT,
+    LambdaConfig: ABSENT
   });
 });
 
 test("triggers is string", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     triggers: {
-      createAuthChallenge: "test/lambda.handler",
-    },
+      createAuthChallenge: "test/lambda.handler"
+    }
   });
   hasResource(stack, "AWS::Cognito::UserPool", {
     LambdaConfig: {
       CreateAuthChallenge: {
-        "Fn::GetAtt": ["AuthcreateAuthChallenge7103E837", "Arn"],
-      },
-    },
+        "Fn::GetAtt": ["AuthcreateAuthChallenge7103E837", "Arn"]
+      }
+    }
   });
   countResources(stack, "AWS::Lambda::Function", 1);
   hasResource(stack, "AWS::Lambda::Function", {
-    Handler: "test/lambda.handler",
+    Handler: "test/lambda.handler"
   });
 });
 
 test("triggers is string with defaults.function", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     triggers: {
-      createAuthChallenge: "test/lambda.handler",
+      createAuthChallenge: "test/lambda.handler"
     },
     defaults: {
       function: {
         timeout: 3,
         environment: {
-          keyA: "valueA",
-        },
-      },
-    },
+          keyA: "valueA"
+        }
+      }
+    }
   });
   hasResource(stack, "AWS::Lambda::Function", {
     Handler: "test/lambda.handler",
@@ -334,23 +334,23 @@ test("triggers is string with defaults.function", async () => {
     Environment: {
       Variables: {
         keyA: "valueA",
-        AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1",
-      },
-    },
+        AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+      }
+    }
   });
 });
 
 test("triggers is Function", async () => {
   const stack = new Stack(new App(), "stack");
   const f = new Function(stack, "F", { handler: "test/lambda.handler" });
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     triggers: {
-      createAuthChallenge: f,
-    },
+      createAuthChallenge: f
+    }
   });
   countResources(stack, "AWS::Lambda::Function", 1);
   hasResource(stack, "AWS::Lambda::Function", {
-    Handler: "test/lambda.handler",
+    Handler: "test/lambda.handler"
   });
 });
 
@@ -358,50 +358,50 @@ test("triggers is Function with defaults.function", async () => {
   const stack = new Stack(new App(), "stack");
   const f = new Function(stack, "F", { handler: "test/lambda.handler" });
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       triggers: {
-        createAuthChallenge: f,
+        createAuthChallenge: f
       },
       defaults: {
         function: {
-          timeout: 3,
-        },
-      },
+          timeout: 3
+        }
+      }
     });
   }).toThrow(/The "defaults.function" cannot be applied/);
 });
 
 test("triggers is FunctionProps", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     triggers: {
       createAuthChallenge: {
-        handler: "test/lambda.handler",
-      },
-    },
+        handler: "test/lambda.handler"
+      }
+    }
   });
   hasResource(stack, "AWS::Lambda::Function", {
-    Handler: "test/lambda.handler",
+    Handler: "test/lambda.handler"
   });
 });
 
 test("triggers is FunctionProps with defaults.function", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     triggers: {
       createAuthChallenge: {
-        handler: "test/lambda.handler",
-      },
+        handler: "test/lambda.handler"
+      }
     },
     defaults: {
       function: {
-        timeout: 3,
-      },
-    },
+        timeout: 3
+      }
+    }
   });
   hasResource(stack, "AWS::Lambda::Function", {
     Handler: "test/lambda.handler",
-    Timeout: 3,
+    Timeout: 3
   });
 });
 
@@ -409,34 +409,34 @@ test("triggers is redefined error", async () => {
   const stack = new Stack(new App(), "stack");
   const f = new Function(stack, "F", { handler: "test/lambda.handler" });
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       triggers: {
-        createAuthChallenge: "test/lambda.handler",
+        createAuthChallenge: "test/lambda.handler"
       },
       cdk: {
         userPool: {
           lambdaTriggers: {
-            customMessage: f,
-          },
-        },
-      },
+            customMessage: f
+          }
+        }
+      }
     });
   }).toThrow(/Cannot configure the "cdk.userPool.lambdaTriggers"/);
 });
 
 test("identityPoolFederation auth0", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     identityPoolFederation: {
-      auth0: { domain: "https://domain", clientId: "id" },
-    },
+      auth0: { domain: "https://domain", clientId: "id" }
+    }
   });
   countResources(stack, "AWS::Cognito::UserPool", 1);
   countResources(stack, "AWS::Cognito::UserPoolClient", 1);
   countResources(stack, "AWS::IAM::Role", 3);
   hasResource(stack, "Custom::AWSCDKOpenIdConnectProvider", {
     Url: "https://domain",
-    ClientIDList: ["id"],
+    ClientIDList: ["id"]
   });
   hasResource(stack, "AWS::Cognito::IdentityPool", {
     IdentityPoolName: "dev-my-app-Auth",
@@ -452,34 +452,34 @@ test("identityPoolFederation auth0", async () => {
               "cognito-idp.us-east-1.",
               { Ref: "AWS::URLSuffix" },
               "/",
-              { Ref: "AuthUserPool8115E87F" },
-            ],
-          ],
-        },
-      },
-    ],
+              { Ref: "AuthUserPool8115E87F" }
+            ]
+          ]
+        }
+      }
+    ]
   });
 });
 test("identityPoolFederation auth0-domain-without-https", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     identityPoolFederation: {
-      auth0: { domain: "domain", clientId: "id" },
-    },
+      auth0: { domain: "domain", clientId: "id" }
+    }
   });
   hasResource(stack, "Custom::AWSCDKOpenIdConnectProvider", {
     Url: "https://domain",
-    ClientIDList: ["id"],
+    ClientIDList: ["id"]
   });
 });
 
 test("identityPoolFederation auth0-error-missing-domain", async () => {
   const stack = new Stack(new App(), "stack");
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       identityPoolFederation: {
-        auth0: { clientId: "s" } as AuthAuth0Props,
-      },
+        auth0: { clientId: "s" } as CognitoAuth0Props
+      }
     });
   }).toThrow(/Auth0Domain/);
 });
@@ -487,10 +487,10 @@ test("identityPoolFederation auth0-error-missing-domain", async () => {
 test("identityPoolFederation auth0-error-missing-clientId", async () => {
   const stack = new Stack(new App(), "stack");
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       identityPoolFederation: {
-        auth0: { domain: "https://domain" } as AuthAuth0Props,
-      },
+        auth0: { domain: "https://domain" } as CognitoAuth0Props
+      }
     });
   }).toThrow(/Auth0ClientId/);
 });
@@ -498,10 +498,10 @@ test("identityPoolFederation auth0-error-missing-clientId", async () => {
 test("identityPoolFederation amazon-error-missing-appId", async () => {
   const stack = new Stack(new App(), "stack");
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       identityPoolFederation: {
-        amazon: {} as AuthAmazonProps,
-      },
+        amazon: {} as CognitoAmazonProps
+      }
     });
   }).toThrow(/AmazonAppId/);
 });
@@ -509,10 +509,10 @@ test("identityPoolFederation amazon-error-missing-appId", async () => {
 test("identityPoolFederation facebook-error-missing-appId", async () => {
   const stack = new Stack(new App(), "stack");
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       identityPoolFederation: {
-        facebook: {} as AuthFacebookProps,
-      },
+        facebook: {} as CognitoFacebookProps
+      }
     });
   }).toThrow(/FacebookAppId/);
 });
@@ -520,10 +520,10 @@ test("identityPoolFederation facebook-error-missing-appId", async () => {
 test("identityPoolFederation google-error-missing-clientId", async () => {
   const stack = new Stack(new App(), "stack");
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       identityPoolFederation: {
-        google: {} as AuthGoogleProps,
-      },
+        google: {} as CognitoGoogleProps
+      }
     });
   }).toThrow(/GoogleClientId/);
 });
@@ -531,10 +531,10 @@ test("identityPoolFederation google-error-missing-clientId", async () => {
 test("identityPoolFederation twitter-error-missing-consumerKey", async () => {
   const stack = new Stack(new App(), "stack");
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       identityPoolFederation: {
-        twitter: { consumerSecret: "secret" } as AuthTwitterProps,
-      },
+        twitter: { consumerSecret: "secret" } as CognitoTwitterProps
+      }
     });
   }).toThrow(/TwitterConsumerKey/);
 });
@@ -542,10 +542,10 @@ test("identityPoolFederation twitter-error-missing-consumerKey", async () => {
 test("identityPoolFederation twitter-error-missing-consumerSecret", async () => {
   const stack = new Stack(new App(), "stack");
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       identityPoolFederation: {
-        twitter: { consumerKey: "key" } as AuthTwitterProps,
-      },
+        twitter: { consumerKey: "key" } as CognitoTwitterProps
+      }
     });
   }).toThrow(/TwitterConsumerSecret/);
 });
@@ -553,23 +553,23 @@ test("identityPoolFederation twitter-error-missing-consumerSecret", async () => 
 test("identityPoolFederation apple-error-missing-servicesId", async () => {
   const stack = new Stack(new App(), "stack");
   expect(() => {
-    new Auth(stack, "Auth", {
+    new Cognito(stack, "Auth", {
       identityPoolFederation: {
-        apple: {} as AuthAppleProps,
-      },
+        apple: {} as CognitoAppleProps
+      }
     });
   }).toThrow(/AppleServicesId/);
 });
 
 test("multi-social", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     identityPoolFederation: {
       amazon: { appId: "1" },
       apple: { servicesId: "2" },
       facebook: { appId: "3" },
-      google: { clientId: "4" },
-    },
+      google: { clientId: "4" }
+    }
   });
   countResources(stack, "AWS::Cognito::UserPool", 1);
   countResources(stack, "AWS::Cognito::UserPoolClient", 1);
@@ -578,25 +578,25 @@ test("multi-social", async () => {
       "www.amazon.com": "1",
       "appleid.apple.com": "2",
       "graph.facebook.com": "3",
-      "accounts.google.com": "4",
-    },
+      "accounts.google.com": "4"
+    }
   });
 });
 
 test("identity-pool-props", async () => {
   const stack = new Stack(new App(), "stack");
-  new Auth(stack, "Auth", {
+  new Cognito(stack, "Auth", {
     identityPoolFederation: {
       cdk: {
         cfnIdentityPool: {
-          allowUnauthenticatedIdentities: false,
-        },
-      },
-    },
+          allowUnauthenticatedIdentities: false
+        }
+      }
+    }
   });
   hasResource(stack, "AWS::Cognito::IdentityPool", {
     IdentityPoolName: "dev-my-app-Auth",
-    AllowUnauthenticatedIdentities: false,
+    AllowUnauthenticatedIdentities: false
   });
 });
 
@@ -606,92 +606,92 @@ test("identity-pool-props", async () => {
 
 test("getFunction", async () => {
   const stack = new Stack(new App(), "stack");
-  const ret = new Auth(stack, "Auth", {
+  const ret = new Cognito(stack, "Auth", {
     triggers: {
-      createAuthChallenge: "test/lambda.handler",
-    },
+      createAuthChallenge: "test/lambda.handler"
+    }
   });
   expect(ret.getFunction("createAuthChallenge")).toBeDefined();
 });
 
 test("getFunction-undefined", async () => {
   const stack = new Stack(new App(), "stack");
-  const ret = new Auth(stack, "Auth", {
+  const ret = new Cognito(stack, "Auth", {
     triggers: {
-      createAuthChallenge: "test/lambda.handler",
-    },
+      createAuthChallenge: "test/lambda.handler"
+    }
   });
   expect(ret.getFunction("customMessage")).toBeUndefined();
 });
 
 test("attachPermissionsForTrigger", async () => {
   const stack = new Stack(new App(), "stack");
-  const auth = new Auth(stack, "Auth", {
+  const auth = new Cognito(stack, "Auth", {
     triggers: {
       createAuthChallenge: "test/lambda.handler",
-      customMessage: "test/lambda.handler",
-    },
+      customMessage: "test/lambda.handler"
+    }
   });
   auth.attachPermissionsForTrigger("createAuthChallenge", ["s3"]);
   hasResource(stack, "AWS::IAM::Policy", {
     PolicyDocument: {
       Statement: [
         lambdaDefaultPolicy,
-        { Action: "s3:*", Effect: "Allow", Resource: "*" },
+        { Action: "s3:*", Effect: "Allow", Resource: "*" }
       ],
-      Version: "2012-10-17",
+      Version: "2012-10-17"
     },
-    PolicyName: "AuthcreateAuthChallengeServiceRoleDefaultPolicy5BD25E0B",
+    PolicyName: "AuthcreateAuthChallengeServiceRoleDefaultPolicy5BD25E0B"
   });
   hasResource(stack, "AWS::IAM::Policy", {
     PolicyDocument: {
       Statement: [lambdaDefaultPolicy],
-      Version: "2012-10-17",
+      Version: "2012-10-17"
     },
-    PolicyName: "AuthcustomMessageServiceRoleDefaultPolicyDD31678C",
+    PolicyName: "AuthcustomMessageServiceRoleDefaultPolicyDD31678C"
   });
 });
 
 test("attachPermissionsForTriggers", async () => {
   const stack = new Stack(new App(), "stack");
-  const auth = new Auth(stack, "Auth", {
+  const auth = new Cognito(stack, "Auth", {
     triggers: {
       createAuthChallenge: "test/lambda.handler",
-      customMessage: "test/lambda.handler",
-    },
+      customMessage: "test/lambda.handler"
+    }
   });
   auth.attachPermissionsForTriggers(["s3"]);
   hasResource(stack, "AWS::IAM::Policy", {
     PolicyDocument: {
       Statement: [
         lambdaDefaultPolicy,
-        { Action: "s3:*", Effect: "Allow", Resource: "*" },
+        { Action: "s3:*", Effect: "Allow", Resource: "*" }
       ],
-      Version: "2012-10-17",
+      Version: "2012-10-17"
     },
-    PolicyName: "AuthcreateAuthChallengeServiceRoleDefaultPolicy5BD25E0B",
+    PolicyName: "AuthcreateAuthChallengeServiceRoleDefaultPolicy5BD25E0B"
   });
   hasResource(stack, "AWS::IAM::Policy", {
     PolicyDocument: {
       Statement: [
         lambdaDefaultPolicy,
-        { Action: "s3:*", Effect: "Allow", Resource: "*" },
+        { Action: "s3:*", Effect: "Allow", Resource: "*" }
       ],
-      Version: "2012-10-17",
+      Version: "2012-10-17"
     },
-    PolicyName: "AuthcustomMessageServiceRoleDefaultPolicyDD31678C",
+    PolicyName: "AuthcustomMessageServiceRoleDefaultPolicyDD31678C"
   });
 });
 
 test("attachPermissionsForAuthUsers: without scope (deprecated)", async () => {
   const stack = new Stack(new App(), "stack");
-  const auth = new Auth(stack, "Auth", {});
+  const auth = new Cognito(stack, "Auth", {});
   auth.attachPermissionsForAuthUsers([
     new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ["s3:*"],
-      resources: ["*"],
-    }),
+      resources: ["*"]
+    })
   ]);
   hasResource(stack, "AWS::IAM::Policy", {
     PolicyDocument: {
@@ -700,31 +700,31 @@ test("attachPermissionsForAuthUsers: without scope (deprecated)", async () => {
           Action: [
             "mobileanalytics:PutEvents",
             "cognito-sync:*",
-            "cognito-identity:*",
+            "cognito-identity:*"
           ],
           Effect: "Allow",
-          Resource: "*",
+          Resource: "*"
         },
         {
           Action: "s3:*",
           Effect: "Allow",
-          Resource: "*",
-        },
+          Resource: "*"
+        }
       ],
-      Version: "2012-10-17",
-    },
+      Version: "2012-10-17"
+    }
   });
 });
 
 test("attachPermissionsForAuthUsers: with scope same stack", async () => {
   const stack = new Stack(new App(), "stack");
-  const auth = new Auth(stack, "Auth", {});
+  const auth = new Cognito(stack, "Auth", {});
   auth.attachPermissionsForAuthUsers(stack, [
     new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ["s3:*"],
-      resources: ["*"],
-    }),
+      resources: ["*"]
+    })
   ]);
   hasResource(stack, "AWS::IAM::Policy", {
     PolicyDocument: {
@@ -733,19 +733,19 @@ test("attachPermissionsForAuthUsers: with scope same stack", async () => {
           Action: [
             "mobileanalytics:PutEvents",
             "cognito-sync:*",
-            "cognito-identity:*",
+            "cognito-identity:*"
           ],
           Effect: "Allow",
-          Resource: "*",
+          Resource: "*"
         },
         {
           Action: "s3:*",
           Effect: "Allow",
-          Resource: "*",
-        },
+          Resource: "*"
+        }
       ],
-      Version: "2012-10-17",
-    },
+      Version: "2012-10-17"
+    }
   });
 });
 
@@ -753,13 +753,13 @@ test("attachPermissionsForAuthUsers: with scope diff stack", async () => {
   const app = new App();
   const stack = new Stack(app, "stack");
   const stack2 = new Stack(app, "stack2");
-  const auth = new Auth(stack, "Auth", {});
+  const auth = new Cognito(stack, "Auth", {});
   auth.attachPermissionsForAuthUsers(stack2, [
     new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ["s3:*"],
-      resources: ["*"],
-    }),
+      resources: ["*"]
+    })
   ]);
   hasResource(stack, "AWS::IAM::Policy", {
     PolicyDocument: {
@@ -768,14 +768,14 @@ test("attachPermissionsForAuthUsers: with scope diff stack", async () => {
           Action: [
             "mobileanalytics:PutEvents",
             "cognito-sync:*",
-            "cognito-identity:*",
+            "cognito-identity:*"
           ],
           Effect: "Allow",
-          Resource: "*",
-        },
+          Resource: "*"
+        }
       ],
-      Version: "2012-10-17",
-    },
+      Version: "2012-10-17"
+    }
   });
   hasResource(stack2, "AWS::IAM::Policy", {
     PolicyDocument: {
@@ -783,14 +783,12 @@ test("attachPermissionsForAuthUsers: with scope diff stack", async () => {
         {
           Action: "s3:*",
           Effect: "Allow",
-          Resource: "*",
-        },
+          Resource: "*"
+        }
       ],
-      Version: "2012-10-17",
+      Version: "2012-10-17"
     },
-    Roles: [
-      { "Fn::ImportValue": ANY }
-    ]
+    Roles: [{ "Fn::ImportValue": ANY }]
   });
 });
 
@@ -798,20 +796,20 @@ test("attachPermissionsForAuthUsers: with scope diff stack multiple calls", asyn
   const app = new App();
   const stack = new Stack(app, "stack");
   const stack2 = new Stack(app, "stack2");
-  const auth = new Auth(stack, "Auth", {});
+  const auth = new Cognito(stack, "Auth", {});
   auth.attachPermissionsForAuthUsers(stack2, [
     new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ["s3:*"],
-      resources: ["*"],
-    }),
+      resources: ["*"]
+    })
   ]);
   auth.attachPermissionsForAuthUsers(stack2, [
     new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ["dynamodb:*"],
-      resources: ["*"],
-    }),
+      resources: ["*"]
+    })
   ]);
   hasResource(stack2, "AWS::IAM::Policy", {
     PolicyDocument: {
@@ -819,31 +817,29 @@ test("attachPermissionsForAuthUsers: with scope diff stack multiple calls", asyn
         {
           Action: "s3:*",
           Effect: "Allow",
-          Resource: "*",
+          Resource: "*"
         },
         {
           Action: "dynamodb:*",
           Effect: "Allow",
-          Resource: "*",
-        },
+          Resource: "*"
+        }
       ],
-      Version: "2012-10-17",
+      Version: "2012-10-17"
     },
-    Roles: [
-      { "Fn::ImportValue": ANY }
-    ]
+    Roles: [{ "Fn::ImportValue": ANY }]
   });
 });
 
 test("attachPermissionsForUnauthUsers: without scope (deprecated)", async () => {
   const stack = new Stack(new App(), "stack");
-  const auth = new Auth(stack, "Auth", {});
+  const auth = new Cognito(stack, "Auth", {});
   auth.attachPermissionsForUnauthUsers([
     new iam.PolicyStatement({
       effect: iam.Effect.DENY,
       actions: ["s3:*"],
-      resources: ["*"],
-    }),
+      resources: ["*"]
+    })
   ]);
   hasResource(stack, "AWS::IAM::Policy", {
     PolicyDocument: {
@@ -851,48 +847,45 @@ test("attachPermissionsForUnauthUsers: without scope (deprecated)", async () => 
         {
           Action: ["mobileanalytics:PutEvents", "cognito-sync:*"],
           Effect: "Allow",
-          Resource: "*",
+          Resource: "*"
         },
         {
           Action: "s3:*",
           Effect: "Deny",
-          Resource: "*",
-        },
+          Resource: "*"
+        }
       ],
-      Version: "2012-10-17",
-    },
+      Version: "2012-10-17"
+    }
   });
 });
 
 test("attachPermissionsForUnauthUsers: with scope same stack", async () => {
   const stack = new Stack(new App(), "stack");
-  const auth = new Auth(stack, "Auth", {});
+  const auth = new Cognito(stack, "Auth", {});
   auth.attachPermissionsForUnauthUsers(stack, [
     new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ["s3:*"],
-      resources: ["*"],
-    }),
+      resources: ["*"]
+    })
   ]);
   hasResource(stack, "AWS::IAM::Policy", {
     PolicyDocument: {
       Statement: [
         {
-          Action: [
-            "mobileanalytics:PutEvents",
-            "cognito-sync:*",
-          ],
+          Action: ["mobileanalytics:PutEvents", "cognito-sync:*"],
           Effect: "Allow",
-          Resource: "*",
+          Resource: "*"
         },
         {
           Action: "s3:*",
           Effect: "Allow",
-          Resource: "*",
-        },
+          Resource: "*"
+        }
       ],
-      Version: "2012-10-17",
-    },
+      Version: "2012-10-17"
+    }
   });
 });
 
@@ -900,28 +893,25 @@ test("attachPermissionsForUnauthUsers: with scope diff stack", async () => {
   const app = new App();
   const stack = new Stack(app, "stack");
   const stack2 = new Stack(app, "stack2");
-  const auth = new Auth(stack, "Auth", {});
+  const auth = new Cognito(stack, "Auth", {});
   auth.attachPermissionsForUnauthUsers(stack2, [
     new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ["s3:*"],
-      resources: ["*"],
-    }),
+      resources: ["*"]
+    })
   ]);
   hasResource(stack, "AWS::IAM::Policy", {
     PolicyDocument: {
       Statement: [
         {
-          Action: [
-            "mobileanalytics:PutEvents",
-            "cognito-sync:*",
-          ],
+          Action: ["mobileanalytics:PutEvents", "cognito-sync:*"],
           Effect: "Allow",
-          Resource: "*",
-        },
+          Resource: "*"
+        }
       ],
-      Version: "2012-10-17",
-    },
+      Version: "2012-10-17"
+    }
   });
   hasResource(stack2, "AWS::IAM::Policy", {
     PolicyDocument: {
@@ -929,14 +919,12 @@ test("attachPermissionsForUnauthUsers: with scope diff stack", async () => {
         {
           Action: "s3:*",
           Effect: "Allow",
-          Resource: "*",
-        },
+          Resource: "*"
+        }
       ],
-      Version: "2012-10-17",
+      Version: "2012-10-17"
     },
-    Roles: [
-      { "Fn::ImportValue": ANY }
-    ]
+    Roles: [{ "Fn::ImportValue": ANY }]
   });
 });
 
@@ -944,20 +932,20 @@ test("attachPermissionsForUnauthUsers: with scope diff stack multiple calls", as
   const app = new App();
   const stack = new Stack(app, "stack");
   const stack2 = new Stack(app, "stack2");
-  const auth = new Auth(stack, "Auth", {});
+  const auth = new Cognito(stack, "Auth", {});
   auth.attachPermissionsForUnauthUsers(stack2, [
     new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ["s3:*"],
-      resources: ["*"],
-    }),
+      resources: ["*"]
+    })
   ]);
   auth.attachPermissionsForUnauthUsers(stack2, [
     new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: ["dynamodb:*"],
-      resources: ["*"],
-    }),
+      resources: ["*"]
+    })
   ]);
   hasResource(stack2, "AWS::IAM::Policy", {
     PolicyDocument: {
@@ -965,18 +953,16 @@ test("attachPermissionsForUnauthUsers: with scope diff stack multiple calls", as
         {
           Action: "s3:*",
           Effect: "Allow",
-          Resource: "*",
+          Resource: "*"
         },
         {
           Action: "dynamodb:*",
           Effect: "Allow",
-          Resource: "*",
-        },
+          Resource: "*"
+        }
       ],
-      Version: "2012-10-17",
+      Version: "2012-10-17"
     },
-    Roles: [
-      { "Fn::ImportValue": ANY }
-    ]
+    Roles: [{ "Fn::ImportValue": ANY }]
   });
 });

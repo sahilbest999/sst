@@ -4,15 +4,24 @@ import * as cognito from "aws-cdk-lib/aws-cognito";
 
 import { App } from "./App.js";
 import { Stack } from "./Stack.js";
-import { getFunctionRef, SSTConstruct, isCDKConstruct, isConstruct } from "./Construct.js";
+import {
+  getFunctionRef,
+  SSTConstruct,
+  isCDKConstruct,
+  isConstruct
+} from "./Construct.js";
 import {
   Function as Fn,
   FunctionProps,
-  FunctionDefinition,
+  FunctionDefinition
 } from "./Function.js";
-import { Permissions, attachPermissionsToRole, attachPermissionsToPolicy } from "./util/permission.js";
+import {
+  Permissions,
+  attachPermissionsToRole,
+  attachPermissionsToPolicy
+} from "./util/permission.js";
 
-const AuthUserPoolTriggerOperationMapping = {
+const CognitoUserPoolTriggerOperationMapping = {
   createAuthChallenge: cognito.UserPoolOperation.CREATE_AUTH_CHALLENGE,
   customEmailSender: cognito.UserPoolOperation.CUSTOM_EMAIL_SENDER,
   customMessage: cognito.UserPoolOperation.CUSTOM_MESSAGE,
@@ -25,10 +34,10 @@ const AuthUserPoolTriggerOperationMapping = {
   preTokenGeneration: cognito.UserPoolOperation.PRE_TOKEN_GENERATION,
   userMigration: cognito.UserPoolOperation.USER_MIGRATION,
   verifyAuthChallengeResponse:
-    cognito.UserPoolOperation.VERIFY_AUTH_CHALLENGE_RESPONSE,
+    cognito.UserPoolOperation.VERIFY_AUTH_CHALLENGE_RESPONSE
 };
 
-export interface AuthUserPoolTriggers {
+export interface CognitoUserPoolTriggers {
   createAuthChallenge?: FunctionDefinition;
   customEmailSender?: FunctionDefinition;
   customMessage?: FunctionDefinition;
@@ -43,50 +52,50 @@ export interface AuthUserPoolTriggers {
   verifyAuthChallengeResponse?: FunctionDefinition;
 }
 
-export interface AuthAuth0Props {
+export interface CognitoAuth0Props {
   domain: string;
   clientId: string;
 }
 
-export interface AuthAmazonProps {
+export interface CognitoAmazonProps {
   appId: string;
 }
 
-export interface AuthAppleProps {
+export interface CognitoAppleProps {
   servicesId: string;
 }
 
-export interface AuthFacebookProps {
+export interface CognitoFacebookProps {
   appId: string;
 }
 
-export interface AuthGoogleProps {
+export interface CognitoGoogleProps {
   clientId: string;
 }
 
-export interface AuthTwitterProps {
+export interface CognitoTwitterProps {
   consumerKey: string;
   consumerSecret: string;
 }
 
-export interface AuthCdkCfnIdentityPoolProps
+export interface CognitoCdkCfnIdentityPoolProps
   extends Omit<cognito.CfnIdentityPoolProps, "allowUnauthenticatedIdentities"> {
   allowUnauthenticatedIdentities?: boolean;
 }
 
-export interface AuthCognitoIdentityPoolFederationProps {
-  auth0?: AuthAuth0Props;
-  amazon?: AuthAmazonProps;
-  apple?: AuthAppleProps;
-  facebook?: AuthFacebookProps;
-  google?: AuthGoogleProps;
-  twitter?: AuthTwitterProps;
+export interface CognitoIdentityPoolFederationProps {
+  auth0?: CognitoAuth0Props;
+  amazon?: CognitoAmazonProps;
+  apple?: CognitoAppleProps;
+  facebook?: CognitoFacebookProps;
+  google?: CognitoGoogleProps;
+  twitter?: CognitoTwitterProps;
   cdk?: {
-    cfnIdentityPool?: AuthCdkCfnIdentityPoolProps;
+    cfnIdentityPool?: CognitoCdkCfnIdentityPoolProps;
   };
 }
 
-export interface AuthProps {
+export interface CognitoProps {
   defaults?: {
     /**
      * The default function props to be applied to all the triggers in the UserPool. The `environment`, `permissions` and `layers` properties will be merged with per route definitions if they are defined.
@@ -132,12 +141,12 @@ export interface AuthProps {
    * });
    * ```
    */
-  triggers?: AuthUserPoolTriggers;
+  triggers?: CognitoUserPoolTriggers;
   /**
    * Configure the Cognito Identity Pool and its authentication providers.
    * @default Identity Pool created with the User Pool as the authentication provider
    */
-  identityPoolFederation?: boolean | AuthCognitoIdentityPoolFederationProps;
+  identityPoolFederation?: boolean | CognitoIdentityPoolFederationProps;
   cdk?: {
     /**
      * This allows you to override the default settings this construct uses internally to create the User Pool.
@@ -155,17 +164,17 @@ export interface AuthProps {
 /////////////////////
 
 /**
- * The `Auth` construct is a higher level CDK construct that makes it easy to configure a Cognito User Pool and Cognito Identity Pool.
+ * The `Cognito` construct is a higher level CDK construct that makes it easy to configure a Cognito User Pool and Cognito Identity Pool.
  *
  * @example
  *
  * ```js
- * import { Auth } from "@serverless-stack/resources";
+ * import { Cognito } from "@serverless-stack/resources";
  *
- * new Auth(stack, "Auth");
+ * new Cognito(stack, "Cognito");
  * ```
  */
-export class Auth extends Construct implements SSTConstruct {
+export class Cognito extends Construct implements SSTConstruct {
   public readonly cdk: {
     userPool: cognito.IUserPool;
     userPoolClient: cognito.IUserPoolClient;
@@ -175,9 +184,9 @@ export class Auth extends Construct implements SSTConstruct {
   };
   private functions: { [key: string]: Fn };
   private permissionsAttachedForAllTriggers: Permissions[];
-  private props: AuthProps;
+  private props: CognitoProps;
 
-  constructor(scope: Construct, id: string, props?: AuthProps) {
+  constructor(scope: Construct, id: string, props?: CognitoProps) {
     super(scope, id);
 
     this.props = props || {};
@@ -227,10 +236,13 @@ export class Auth extends Construct implements SSTConstruct {
    * auth.attachPermissionsForAuthUsers(stack, ["s3"]);
    * ```
    */
-  public attachPermissionsForAuthUsers(scope: Construct, permissions: Permissions): void;
+  public attachPermissionsForAuthUsers(
+    scope: Construct,
+    permissions: Permissions
+  ): void;
   /**
    * @deprecated You are now required to pass in a scope as the first argument.
-   * 
+   *
    * ```js
    * // Change
    * auth.attachPermissionsForAuthUsers(["s3"]);
@@ -251,7 +263,10 @@ export class Auth extends Construct implements SSTConstruct {
    * auth.attachPermissionsForUnauthUsers(stack, ["s3"]);
    * ```
    */
-  public attachPermissionsForUnauthUsers(scope: Construct, permissions: Permissions): void;
+  public attachPermissionsForUnauthUsers(
+    scope: Construct,
+    permissions: Permissions
+  ): void;
   /**
    * @deprecated You are now required to pass in a scope as the first argument.
    * ```js
@@ -267,14 +282,14 @@ export class Auth extends Construct implements SSTConstruct {
   }
 
   public attachPermissionsForTriggers(permissions: Permissions): void {
-    Object.values(this.functions).forEach((fn) =>
+    Object.values(this.functions).forEach(fn =>
       fn.attachPermissions(permissions)
     );
     this.permissionsAttachedForAllTriggers.push(permissions);
   }
 
   public attachPermissionsForTrigger(
-    triggerKey: keyof AuthUserPoolTriggers,
+    triggerKey: keyof CognitoUserPoolTriggers,
     permissions: Permissions
   ): void {
     const fn = this.getFunction(triggerKey);
@@ -287,32 +302,37 @@ export class Auth extends Construct implements SSTConstruct {
     fn.attachPermissions(permissions);
   }
 
-  public getFunction(triggerKey: keyof AuthUserPoolTriggers): Fn | undefined {
+  public getFunction(
+    triggerKey: keyof CognitoUserPoolTriggers
+  ): Fn | undefined {
     return this.functions[triggerKey];
   }
 
   public getConstructMetadata() {
     return {
-      type: "Auth" as const,
+      type: "Cognito" as const,
       data: {
         identityPoolId: this.cdk.cfnIdentityPool?.ref,
         userPoolId: this.cdk.userPool.userPoolId,
         triggers: Object.entries(this.functions).map(([name, fun]) => ({
           name,
-          fn: getFunctionRef(fun),
-        })),
-      },
+          fn: getFunctionRef(fun)
+        }))
+      }
     };
   }
 
-  private attachPermissionsForUsers(role: iam.Role, arg1: any, arg2?: any): void {
+  private attachPermissionsForUsers(
+    role: iam.Role,
+    arg1: any,
+    arg2?: any
+  ): void {
     let scope: Construct;
     let permissions: Permissions;
     if (arg2) {
       scope = arg1;
       permissions = arg2;
-    }
-    else {
+    } else {
       scope = this;
       permissions = arg1;
     }
@@ -324,9 +344,10 @@ export class Auth extends Construct implements SSTConstruct {
     }
     // If the scope is within a different stack, we need to create a new role and attach the permissions to that role.
     else {
-      const policyId = role === this.cdk.authRole
-        ? `Auth-${this.node.id}-AuthRole`
-        : `Auth-${this.node.id}-UnauthRole`;
+      const policyId =
+        role === this.cdk.authRole
+          ? `Auth-${this.node.id}-AuthRole`
+          : `Auth-${this.node.id}-UnauthRole`;
       let policy = scope.node.tryFindChild(policyId) as iam.Policy;
       if (!policy) {
         policy = new iam.Policy(scope, policyId);
@@ -350,7 +371,7 @@ export class Auth extends Construct implements SSTConstruct {
       // validate `lambdaTriggers` is not specified
       if (cognitoUserPoolProps.lambdaTriggers) {
         throw new Error(
-          `Cannot configure the "cdk.userPool.lambdaTriggers" in the Auth construct. Use the "triggers" instead.`
+          `Cannot configure the "cdk.userPool.lambdaTriggers" in the Cognito construct. Use the "triggers" instead.`
         );
       }
       // validate `cdk.userPoolClient` is not imported
@@ -365,7 +386,7 @@ export class Auth extends Construct implements SSTConstruct {
         selfSignUpEnabled: true,
         signInCaseSensitive: false,
         signInAliases: this.buildSignInAliases(login),
-        ...cognitoUserPoolProps,
+        ...cognitoUserPoolProps
       });
     }
   }
@@ -383,7 +404,7 @@ export class Auth extends Construct implements SSTConstruct {
         "UserPoolClient",
         {
           userPool: this.cdk.userPool,
-          ...clientProps,
+          ...clientProps
         }
       );
     }
@@ -408,15 +429,21 @@ export class Auth extends Construct implements SSTConstruct {
     const urlSuffix = Stack.of(this).urlSuffix;
     cognitoIdentityProviders.push({
       providerName: `cognito-idp.${app.region}.${urlSuffix}/${this.cdk.userPool.userPoolId}`,
-      clientId: this.cdk.userPoolClient.userPoolClientId,
+      clientId: this.cdk.userPoolClient.userPoolClientId
     });
 
     if (typeof identityPoolFederation === "object") {
-      const { auth0, amazon, apple, facebook, google, twitter } =
-        identityPoolFederation;
+      const {
+        auth0,
+        amazon,
+        apple,
+        facebook,
+        google,
+        twitter
+      } = identityPoolFederation;
 
       ////////////////////
-      // Handle OpenId Connect Providers (ie. Auth0)
+      // Handle OpenId Connect Providers (ie. Cognito)
       ////////////////////
       if (auth0) {
         if (!auth0.domain) {
@@ -433,7 +460,7 @@ export class Auth extends Construct implements SSTConstruct {
           url: auth0.domain.startsWith("https://")
             ? auth0.domain
             : `https://${auth0.domain}`,
-          clientIds: [auth0.clientId],
+          clientIds: [auth0.clientId]
         });
         openIdConnectProviderArns.push(provider.openIdConnectProviderArn);
       }
@@ -504,7 +531,7 @@ export class Auth extends Construct implements SSTConstruct {
         cognitoIdentityProviders,
         supportedLoginProviders,
         openIdConnectProviderArns,
-        ...identityPoolProps,
+        ...identityPoolProps
       }
     );
     this.cdk.authRole = this.createAuthRole(this.cdk.cfnIdentityPool);
@@ -518,8 +545,8 @@ export class Auth extends Construct implements SSTConstruct {
         identityPoolId: this.cdk.cfnIdentityPool.ref,
         roles: {
           authenticated: this.cdk.authRole.roleArn,
-          unauthenticated: this.cdk.unauthRole.roleArn,
-        },
+          unauthenticated: this.cdk.unauthRole.roleArn
+        }
       }
     );
   }
@@ -540,7 +567,7 @@ export class Auth extends Construct implements SSTConstruct {
     Object.entries(triggers).forEach(([triggerKey, triggerValue]) =>
       this.addTrigger(
         this,
-        triggerKey as keyof AuthUserPoolTriggers,
+        triggerKey as keyof CognitoUserPoolTriggers,
         triggerValue,
         defaults?.function
       )
@@ -549,14 +576,14 @@ export class Auth extends Construct implements SSTConstruct {
 
   private addTrigger(
     scope: Construct,
-    triggerKey: keyof AuthUserPoolTriggers,
+    triggerKey: keyof CognitoUserPoolTriggers,
     triggerValue: FunctionDefinition,
     functionProps?: FunctionProps
   ): Fn {
     // Validate cognito user pool is defined
     if (!this.cdk.userPool) {
       throw new Error(
-        `Triggers cannot be added. No Cognito UserPool defined for the Auth construct.`
+        `Triggers cannot be added. No Cognito UserPool defined for the Cognito construct.`
       );
     }
 
@@ -566,11 +593,11 @@ export class Auth extends Construct implements SSTConstruct {
       triggerKey,
       triggerValue,
       functionProps,
-      `The "defaults.function" cannot be applied if an instance of a Function construct is passed in. Make sure to define all the triggers using FunctionProps, so the Auth construct can apply the "defaults.function" to them.`
+      `The "defaults.function" cannot be applied if an instance of a Function construct is passed in. Make sure to define all the triggers using FunctionProps, so the Cognito construct can apply the "defaults.function" to them.`
     );
 
     // Create trigger
-    const operation = AuthUserPoolTriggerOperationMapping[triggerKey];
+    const operation = CognitoUserPoolTriggerOperationMapping[triggerKey];
     (this.cdk.userPool as cognito.UserPool).addTrigger(operation, lambda);
 
     // Store function
@@ -585,14 +612,14 @@ export class Auth extends Construct implements SSTConstruct {
         "cognito-identity.amazonaws.com",
         {
           StringEquals: {
-            "cognito-identity.amazonaws.com:aud": identityPool.ref,
+            "cognito-identity.amazonaws.com:aud": identityPool.ref
           },
           "ForAnyValue:StringLike": {
-            "cognito-identity.amazonaws.com:amr": "authenticated",
-          },
+            "cognito-identity.amazonaws.com:amr": "authenticated"
+          }
         },
         "sts:AssumeRoleWithWebIdentity"
-      ),
+      )
     });
 
     role.addToPolicy(
@@ -601,9 +628,9 @@ export class Auth extends Construct implements SSTConstruct {
         actions: [
           "mobileanalytics:PutEvents",
           "cognito-sync:*",
-          "cognito-identity:*",
+          "cognito-identity:*"
         ],
-        resources: ["*"],
+        resources: ["*"]
       })
     );
 
@@ -616,21 +643,21 @@ export class Auth extends Construct implements SSTConstruct {
         "cognito-identity.amazonaws.com",
         {
           StringEquals: {
-            "cognito-identity.amazonaws.com:aud": identityPool.ref,
+            "cognito-identity.amazonaws.com:aud": identityPool.ref
           },
           "ForAnyValue:StringLike": {
-            "cognito-identity.amazonaws.com:amr": "unauthenticated",
-          },
+            "cognito-identity.amazonaws.com:amr": "unauthenticated"
+          }
         },
         "sts:AssumeRoleWithWebIdentity"
-      ),
+      )
     });
 
     role.addToPolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["mobileanalytics:PutEvents", "cognito-sync:*"],
-        resources: ["*"],
+        resources: ["*"]
       })
     );
 
@@ -648,7 +675,7 @@ export class Auth extends Construct implements SSTConstruct {
       email: login.includes("email"),
       phone: login.includes("phone"),
       username: login.includes("username"),
-      preferredUsername: login.includes("preferredUsername"),
+      preferredUsername: login.includes("preferredUsername")
     };
   }
 }
