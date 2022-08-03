@@ -1,6 +1,7 @@
 import { Construct } from "constructs";
-import { FunctionInlineDefinition } from "./Function";
 import { Api } from "./Api";
+import { FunctionDefinition } from "./Function";
+
 export interface AuthProps {
   /**
    * The API to attach auth routes to
@@ -10,7 +11,7 @@ export interface AuthProps {
   /**
    * The function that will handle authentication
    */
-  function: FunctionInlineDefinition;
+  authenticator: FunctionDefinition;
 
   /**
    * Optionally specify the prefix to mount authentication routes
@@ -38,7 +39,10 @@ export class Auth extends Construct {
     const prefix = props.prefix || "/auth";
 
     props.api.addRoutes(scope, {
-      [`ANY ${prefix}/{proxy+}`]: props.function
+      [`ANY ${prefix}/{proxy+}`]: {
+        type: "function",
+        function: props.authenticator
+      }
     });
   }
 }
