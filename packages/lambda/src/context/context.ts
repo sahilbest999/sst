@@ -1,13 +1,13 @@
 export const Context = {
   create,
   reset,
-  memo
+  memo,
 };
 
 const state = {
-  requestID: "",
+  // requestID: "",
   contexts: new Map<any, ContextInfo>(),
-  tracking: [] as any[]
+  tracking: [] as any[],
 };
 
 interface ContextInfo {
@@ -28,7 +28,7 @@ function create<C>(cb?: () => C) {
         state.tracking.pop();
         result = {
           value,
-          dependants: new Set()
+          dependants: new Set(),
         };
         state.contexts.set(id, result);
       }
@@ -38,24 +38,25 @@ function create<C>(cb?: () => C) {
       return result!.value as C;
     },
     provide(value: C) {
+      // If a new request has started, automatically clear all contexts
+      /*
       const requestID = (global as any)[
         Symbol.for("aws.lambda.runtime.requestId")
       ];
-
-      // If a new request has started, automatically clear all contexts
       if (state.requestID !== requestID) {
         state.requestID = requestID;
         reset();
       }
+      */
 
       // If the context is already set, we need to reset its dependants
       resetDependencies(id);
 
       state.contexts.set(id, {
         value,
-        dependants: new Set()
+        dependants: new Set(),
       });
-    }
+    },
   };
 }
 
@@ -76,3 +77,5 @@ export function memo<C>(cb: () => C) {
   const ctx = create(cb);
   return ctx.use;
 }
+
+5;
