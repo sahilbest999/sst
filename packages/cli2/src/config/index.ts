@@ -11,11 +11,11 @@ export interface Config {
 }
 
 const DEFAULTS = {
-  main: "stacks/index.ts"
+  main: "stacks/index.ts",
 } as const;
 
 type ConfigWithDefaults = Config &
-  Required<{ [key in keyof typeof DEFAULTS]: Config[key] }>;
+  Required<{ [key in keyof typeof DEFAULTS]: Exclude<Config[key], undefined> }>;
 
 export const ProjectRoot = Context.create(() => process.cwd());
 
@@ -29,7 +29,7 @@ export const useConfig = Context.memo(async () => {
         const config = await import(file);
         return {
           ...DEFAULTS,
-          ...config.default
+          ...config.default,
         } as ConfigWithDefaults;
       } catch (ex) {
         continue;

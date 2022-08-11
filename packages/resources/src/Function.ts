@@ -292,7 +292,7 @@ export interface FunctionProps
    *   url: true
    * })
    * ```
-   * 
+   *
    * ```js
    * new Function(stack, "Function", {
    *   handler: "src/function.handler",
@@ -325,7 +325,7 @@ export interface FunctionProps
   layers?: (string | lambda.ILayerVersion)[];
   /**
    * The duration function logs are kept in CloudWatch Logs.
-   * 
+   *
    * When updating this property, unsetting it doesn't retain the logs indefinitely. Explicitly set the value to "infinite".
    * @default Logs retained indefinitely
    * @example
@@ -602,7 +602,7 @@ export interface FunctionBundleNodejsProps extends FunctionBundleBase {
    * })
    * ```
    */
-  sourcemap?: boolean
+  sourcemap?: boolean;
 }
 
 /**
@@ -708,11 +708,13 @@ export class Function extends lambda.Function implements SSTConstruct {
       lambda.Tracing[
         (props.tracing || "active").toUpperCase() as keyof typeof lambda.Tracing
       ];
-    const logRetention = props.logRetention && logs.RetentionDays[
-      props.logRetention.toUpperCase() as keyof typeof logs.RetentionDays
-    ];
+    const logRetention =
+      props.logRetention &&
+      logs.RetentionDays[
+        props.logRetention.toUpperCase() as keyof typeof logs.RetentionDays
+      ];
     let bundle = props.bundle;
-    const permissions = props.permissions;
+    const permissions = props.permissions || [];
     const isLiveDevEnabled = props.enableLiveDev === false ? false : true;
 
     // Validate handler
@@ -779,16 +781,13 @@ export class Function extends lambda.Function implements SSTConstruct {
           ),
           handler: "handler",
           functionName,
-          runtime: lambda.Runtime.GO_1_X,
+          runtime: lambda.Runtime.NODEJS_16_X,
           memorySize,
           ephemeralStorageSize: diskSize,
           timeout,
           tracing,
           environment: {
             ...(props.environment || {}),
-            SST_DEBUG_BRIDGE: app.debugBridge,
-            SST_DEBUG_SRC_PATH: srcPath,
-            SST_DEBUG_SRC_HANDLER: handler,
             SST_DEBUG_ENDPOINT: app.debugEndpoint,
           },
           layers: Function.buildLayers(scope, id, props),
@@ -800,9 +799,9 @@ export class Function extends lambda.Function implements SSTConstruct {
           ...props,
           architecture,
           code: lambda.Code.fromAsset(
-            path.resolve(__dirname, "../dist/stub.zip")
+            path.resolve(__dirname, "./support/bridge")
           ),
-          handler: "index.main",
+          handler: "bridge.handler",
           functionName,
           runtime: isNodeRuntime ? runtime : lambda.Runtime.NODEJS_16_X,
           memorySize,
@@ -821,6 +820,7 @@ export class Function extends lambda.Function implements SSTConstruct {
           retryAttempts: 0,
           ...(debugOverrideProps || {}),
         });
+        this.attachPermissions(["iot"]);
       }
       State.Function.append(app.appPath, {
         id: localId,
@@ -972,14 +972,12 @@ export class Function extends lambda.Function implements SSTConstruct {
     if (url === true) {
       authType = lambda.FunctionUrlAuthType.NONE;
       cors = true;
-    }
-    else {
-      authType = url.authorizer === "iam"
-        ? lambda.FunctionUrlAuthType.AWS_IAM
-        : lambda.FunctionUrlAuthType.NONE;
-      cors = url.cors === undefined
-        ? true
-        : url.cors;
+    } else {
+      authType =
+        url.authorizer === "iam"
+          ? lambda.FunctionUrlAuthType.AWS_IAM
+          : lambda.FunctionUrlAuthType.NONE;
+      cors = url.cors === undefined ? true : url.cors;
     }
     this.functionUrl = this.addFunctionUrl({
       authType,
@@ -996,24 +994,31 @@ export class Function extends lambda.Function implements SSTConstruct {
     this.addEnvironment("SST_STAGE", app.stage, { removeInEdge: true });
     (config || []).forEach((c) => {
       if (c instanceof Secret) {
-        this.addEnvironment(`${FunctionConfig.SECRET_ENV_PREFIX}${c.name}`, "1");
-      }
-      else if (c instanceof Parameter) {
-        this.addEnvironment(`${FunctionConfig.PARAM_ENV_PREFIX}${c.name}`, c.value);
+        this.addEnvironment(
+          `${FunctionConfig.SECRET_ENV_PREFIX}${c.name}`,
+          "1"
+        );
+      } else if (c instanceof Parameter) {
+        this.addEnvironment(
+          `${FunctionConfig.PARAM_ENV_PREFIX}${c.name}`,
+          c.value
+        );
       }
     });
 
     // Attach permissions
     const hasSecrets = (config || []).some((c) => c instanceof Secret);
     if (hasSecrets) {
-      this.attachPermissions([new iam.PolicyStatement({
-        actions: ["ssm:GetParameters"],
-        effect: iam.Effect.ALLOW,
-        resources: [
-          `arn:aws:ssm:${app.region}:${app.account}:parameter/sst/${app.name}/${app.stage}/*`,
-          `arn:aws:ssm:${app.region}:${app.account}:parameter/sst/${app.name}/${FunctionConfig.FALLBACK_STAGE}/*`,
-        ],
-      })]);
+      this.attachPermissions([
+        new iam.PolicyStatement({
+          actions: ["ssm:GetParameters"],
+          effect: iam.Effect.ALLOW,
+          resources: [
+            `arn:aws:ssm:${app.region}:${app.account}:parameter/sst/${app.name}/${app.stage}/*`,
+            `arn:aws:ssm:${app.region}:${app.account}:parameter/sst/${app.name}/${FunctionConfig.FALLBACK_STAGE}/*`,
+          ],
+        }),
+      ]);
     }
   }
 

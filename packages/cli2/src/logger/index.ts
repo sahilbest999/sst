@@ -9,5 +9,8 @@ type Colors = {
 export const Logger = {
   ui<T extends Colors>(color: T, ...lines: string[]) {
     console.log(chalk[color](lines.join("\n")));
-  }
+  },
+  debug(...parts: any[]) {
+    console.log(...parts);
+  },
 };

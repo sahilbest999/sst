@@ -8,13 +8,18 @@ import { useConfig } from "../config/index.js";
 
 type Config = RegionInputConfig & RetryInputConfig & AwsAuthInputConfig;
 
-export const useAWSCredentials = Context.memo(async () => {
+export const useAWSCredentialsProvider = Context.memo(async () => {
   const config = await useConfig();
   const provider = defaultProvider({
     profile: config.profile
   });
   return provider;
 });
+
+export const useAWSCredentials = async () => {
+  const provider = await useAWSCredentialsProvider();
+  return provider();
+};
 
 const useClientCache = Context.memo(() => new Map<string, any>());
 
@@ -27,7 +32,7 @@ export async function useAWSClient<C extends Client<any, any, any, any>>(
   if (existing && !force) return existing as C;
   const [config, credentials] = await Promise.all([
     useConfig(),
-    useAWSCredentials()
+    useAWSCredentialsProvider()
   ]);
   const result = new client({
     region: config.region,

@@ -1,7 +1,7 @@
-import { Context } from "@serverless-stack/lambda/context";
+import { Context } from "@serverless-stack/lambda/context/context.js";
 import path from "path";
 import fs from "fs/promises";
-import { ProjectRoot } from "../config";
+import { ProjectRoot } from "../config/index.js";
 
 export const StateRoot = Context.create(() =>
   path.join(ProjectRoot.use(), ".sst")
@@ -10,7 +10,7 @@ export const StateRoot = Context.create(() =>
 export const useState = Context.memo(async () => {
   const root = StateRoot.use();
   await fs.mkdir(root, {
-    recursive: true
+    recursive: true,
   });
 
   return root;
@@ -25,3 +25,10 @@ export const StageContext = Context.create(async () => {
     return;
   }
 });
+
+export async function requireStage() {
+  const stage = await StageContext.use();
+  if (stage) return stage;
+
+  return "thdxr";
+}

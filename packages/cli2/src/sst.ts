@@ -2,15 +2,13 @@ import chalk from "chalk";
 import { VisibleError } from "./error/index.js";
 
 console.time("cli");
-process.on("uncaughtException", err => {
-  console.log("");
+process.on("uncaughtException", (err) => {
   console.log(chalk.red(err.message));
   console.log(
     chalk.blue(
       "Need help with this error? Join our discord https://discord.gg/sst and talk to the team"
     )
   );
-  console.log("");
   if (!(err instanceof VisibleError)) {
     console.log(chalk.yellow(err.stack));
   }
@@ -23,6 +21,7 @@ process.on("beforeExit", () => {
 import caporal from "@caporal/core";
 import { Update } from "./commands/update.js";
 import { Scrap } from "./commands/scrap.js";
+import { Build } from "./commands/build.js";
 const { program } = caporal;
 
 program
@@ -34,14 +33,18 @@ program
 program
   .command("update", "Update SST and CDK packages to another version")
   .argument("[version]", "Optional version to update to")
-  .action(req => {
+  .action((req) => {
     Update({
-      version: req.args.version?.toString()
+      version: req.args.version?.toString(),
     });
   });
 
-program.command("scrap", "Used to test arbitrary code").action(req => {
+program.command("scrap", "Used to test arbitrary code").action((req) => {
   Scrap();
+});
+
+program.command("build", "Build stacks code").action((req) => {
+  Build();
 });
 
 program.run();
