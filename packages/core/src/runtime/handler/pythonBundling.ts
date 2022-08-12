@@ -10,7 +10,7 @@ import {
   AssetStaging,
   DockerImage,
   FileSystem,
-} from "aws-cdk-lib/core";
+} from "aws-cdk-lib";
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 /**
