@@ -1,5 +1,15 @@
 # @serverless-stack/cli
 
+## 1.8.2
+
+### Patch Changes
+
+- [#1965](https://github.com/serverless-stack/sst/pull/1965) [`a95bec646`](https://github.com/serverless-stack/sst/commit/a95bec6465637a1e95f9d447258f78aafc433354) Thanks [@fwang](https://github.com/fwang)! - Cli: config command respect --profile
+
+- Updated dependencies []:
+  - @serverless-stack/resources@1.8.2
+  - @serverless-stack/core@1.8.2
+
 ## 1.8.1
 
 ### Patch Changes
