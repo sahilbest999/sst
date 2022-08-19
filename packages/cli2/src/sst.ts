@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { VisibleError } from "./error/index.js";
+import { GlobalCLIOptionsContext } from "./cli.js";
 
 console.time("cli");
 process.on("uncaughtException", (err) => {
@@ -22,6 +23,7 @@ import caporal from "@caporal/core";
 import { Update } from "./commands/update.js";
 import { Scrap } from "./commands/scrap.js";
 import { Build } from "./commands/build.js";
+import { Secrets } from "./commands/secrets.js";
 const { program } = caporal;
 
 program
@@ -39,12 +41,27 @@ program
     });
   });
 
-program.command("scrap", "Used to test arbitrary code").action((req) => {
-  Scrap();
-});
+program
+  .command("scrap", "Used to test arbitrary code")
+  .option("--profile <profile>", "AWS profile to use")
+  .option("--stage <stage>", "Stage to use")
+  .action((req) => {
+    GlobalCLIOptionsContext.provide(req.options);
+    Scrap();
+  });
 
-program.command("build", "Build stacks code").action((req) => {
+program.command("build", "Build stacks code").action(() => {
+  GlobalCLIOptionsContext.provide({});
   Build();
 });
+
+program
+  .command("secrets", "")
+  .option("--profile <profile>", "AWS profile to use")
+  .option("--stage <stage>", "Stage to use")
+  .action((req) => {
+    GlobalCLIOptionsContext.provide(req.options);
+    Secrets();
+  });
 
 program.run();

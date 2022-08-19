@@ -16,7 +16,7 @@ export const useState = Context.memo(async () => {
   return root;
 });
 
-export const StageContext = Context.create(async () => {
+export const PersonalStageContext = Context.create(async () => {
   const state = await useState();
   try {
     const result = await fs.readFile(path.join(state, "stage"));
@@ -25,10 +25,3 @@ export const StageContext = Context.create(async () => {
     return;
   }
 });
-
-export async function requireStage() {
-  const stage = await StageContext.use();
-  if (stage) return stage;
-
-  return "thdxr";
-}

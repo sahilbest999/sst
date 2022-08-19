@@ -2,7 +2,6 @@ import { ProjectRoot } from "../config/index.js";
 import fs from "fs/promises";
 import path from "path";
 import { fetch } from "undici";
-import chalk from "chalk";
 import { Logger } from "../logger/index.js";
 
 interface Opts {
@@ -12,7 +11,7 @@ interface Opts {
 const SST_PACKAGES = [
   "@serverless-stack/resources",
   "@serverless-stack/cli",
-  "@serverless-stack/static-site-env"
+  "@serverless-stack/static-site-env",
 ];
 
 const FIELDS = ["dependencies", "devDependencies"];
@@ -23,14 +22,14 @@ export async function Update(opts: Opts) {
   const version =
     opts.version ||
     (await fetch("https://registry.npmjs.org/@serverless-stack/core/latest")
-      .then(resp => resp.json())
+      .then((resp) => resp.json())
       .then((resp: any) => resp.version));
 
   const results = new Map<string, Set<string>>();
-  const tasks = files.map(async file => {
+  const tasks = files.map(async (file) => {
     const data = await fs
       .readFile(file)
-      .then(x => x.toString())
+      .then((x) => x.toString())
       .then(JSON.parse);
 
     for (const field of FIELDS) {
@@ -74,7 +73,7 @@ export async function Update(opts: Opts) {
 async function find(dir: string): Promise<string[]> {
   const children = await fs.readdir(dir);
 
-  const tasks = children.map(async item => {
+  const tasks = children.map(async (item) => {
     if (item === "node_modules") return [];
     // Ignore hidden paths
     if (/(^|\/)\.[^\/\.]/g.test(item)) return [];

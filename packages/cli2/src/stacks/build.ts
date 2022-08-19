@@ -1,10 +1,9 @@
-import { ProjectRoot, useConfig } from "../config";
+import { ProjectRoot, useConfig } from "../config/index.js";
 import esbuild from "esbuild";
 import fs from "fs/promises";
 import path from "path";
-import { Worker } from "worker_threads";
-import { useState } from "../state";
-import { Logger } from "../logger";
+import { Logger } from "../logger/index.js";
+import { useState } from "../state/index.js";
 
 export async function build() {
   Logger.debug("Building stacks");
@@ -20,7 +19,7 @@ export async function build() {
   await esbuild.build({
     keepNames: true,
     bundle: true,
-    sourcemap: false,
+    sourcemap: "inline",
     platform: "node",
     target: "esnext",
     format: "esm",
@@ -51,5 +50,5 @@ export async function build() {
   await fs.rm(outfile, {
     force: true,
   });
-  return mod;
+  return mod.default;
 }
